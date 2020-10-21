@@ -1,4 +1,4 @@
-MODULES=adventure command state main author #FIXME
+MODULES=rtree point rect 
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
