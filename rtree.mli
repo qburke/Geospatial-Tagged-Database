@@ -5,7 +5,7 @@
 type 'a t
 
 (** [empty ()] is the empty R Tree. *)
-val empty : unit -> 'a t
+val empty : 'a -> 'a t
 
 (** [add x r] modifies [r] to include [x]. Requires [x] not in [r]. *)
 val add : Point.t -> 'a -> 'a t -> unit
@@ -17,11 +17,14 @@ val remove : 'a -> 'a t -> unit
 (** [union r1 r2] returns the set union of [r1] and [r2].
     [r1] contains less than or equal to elements than [r2].
     [r1] and [r2] are not allowed to contain duplicates *)
-val union : 'a t -> 'a t -> 'a t
+(* val union : 'a t -> 'a t -> 'a t *)
 
 (** [inter r1 r2] returns the set intersection of [r1] and [r2].
     [r1] contains less than or equal to elements than [r2].	
     [r1] and [r2] are not allowed to contain duplicates *)
-val inter : 'a t -> 'a t -> 'a t
+(* val inter : 'a t -> 'a t -> 'a t *)
+
+(** [to_json t] is the JSON representation of [t]. See R Tree schema. *)
+val to_json : 'a t -> Yojson.Basic.t
 
 (*read and conversion operations*)

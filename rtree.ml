@@ -8,19 +8,6 @@ let max_entries = 8
   Type requirements:
   * access parent
   * mutable bounding box for modifications
-
-  type 'a t = 
-	Node of {
-  	parent: 'a t;
-    mutable mbr: Rect.t;
-    mutable children: 'a t list
-  }
-  | Leaf of {
-  	parent: 'a t;
-    mutable mbr : Rect.t;
-  	mutable entries: 'a Geopoint.t list
-    }
-  | Root
 *)
 
 
@@ -28,8 +15,6 @@ type ('a, 'b) leaf_or_node =
   | Leaf of (Point.t * 'b) list  
   | Node of 'a list
 
-(* I think we should separate children into two fields, one with the record and
-   one with the list *)
 type 'a t = {
   parent: 'a t option;
   mutable mbr: Rect.t;
@@ -37,17 +22,19 @@ type 'a t = {
 }
 
 
-let empty_leaf () = {
-  parent = None;
+let empty_leaf emp par = {
+  parent = Some par;
   mbr = Rect.empty;
-  children = `Entry None;
+  children = `Entry (Some emp);
 }
 
-let empty () = {
-  parent = None;
-  mbr = Rect.empty;
-  children = `Node [empty_leaf ()];
-}
+let empty emp = 
+  let root = {
+    parent = None;
+    mbr = Rect.empty;
+    children = `Node [];
+  } in root.children <- `Node ( (empty_leaf emp root) :: []);
+  root
 
 let parent (n : 'a t) : 'a t =
   match n.parent with
@@ -162,6 +149,7 @@ insert (p, u)
     insert p v
  *)
 
+
 let compare_mbr (compare_x : bool) (x1: 'a t) (x2 : 'a t) : int = 
   let p1 = fst x1.mbr in 
   let p2 = fst x1.mbr in
@@ -169,22 +157,41 @@ let compare_mbr (compare_x : bool) (x1: 'a t) (x2 : 'a t) : int =
   let c2 = if compare_x then fst p2 else snd p2 in
   Stdlib.compare c1 c2
 
+let split_at (n : int) (lst : 'a list) : ('a list * 'a list) = 
+  let rec helper n lst acc = 
+    if n = 0 then ([], lst) else
+      match lst with
+      | [] -> (acc, [])
+      | h :: t -> helper (n - 1) t (h::acc) in
+  helper n lst []
 
-let sort_subtree 
-    (lst: 'a t list)
-    (sort_x: bool) : 'a t list = 
+let sort_subtree (lst: 'a t list) (sort_x: bool) : 'a t list = 
   List.sort (compare_mbr sort_x) lst
+
+let ceil_int n  = n |> ceil |> int_of_float
+
+let perimeter_sum (n : 'a t list) : float = 
+  List.fold_left (fun acc x -> acc +. (Rect.perimeter x.mbr)) 0. n 
 
 (* Perhaps would be easier to split arrays rather than nodes? *)
 (* [split n] is the result of splitting [n],  *) 
 let split (n : 'a t list) : ('a t list * 'a t list) =
-  let m = List.length n in
+  let m = float_of_int (List.length n) in
   let sorted_x = sort_subtree n true in
   let sorted_y = sort_subtree n false in
-  (*
-    TODO
-  *)
-  failwith "unimplemented" 
+  let start_idx = ceil_int (0.25 *. float_of_int max_boxes) in
+  let end_idx = ceil_int (m -. 0.25 *. float_of_int max_boxes) in
+  let min_perimeter_sum = ref 0 in
+  let min_split = ref (n, n) in
+  for i = start_idx to end_idx do
+    (* 
+      compare sets of the first i sets and (m -i) sets for both x-wise split
+      and y-wise split from start_idx to end_idx and update the min_perimeter 
+      and min_split accordingly.
+      *)
+    let s, s' = split_at i n in ()
+  done;
+  (n, n) 
 
 
 
@@ -270,3 +277,16 @@ let union t1 t2 = empty ()
 
 let inter t1 t2 = empty ()
 
+let rec json_of_t t = Yojson.Basic.(
+    `Assoc [
+      ("bottom-left", (t.mbr |> Rect.ll |> Point.to_json));
+      ("upper-right", (t.mbr |> Rect.ur |> Point.to_json));
+      ("children", 
+       match t.children with
+       | `Node lst -> `List (List.map json_of_t lst)
+       | `Entry e -> `Null
+      )
+    ]
+  )
+
+let to_json tree = Yojson.Basic.(`Assoc [("rtree", json_of_t tree)])

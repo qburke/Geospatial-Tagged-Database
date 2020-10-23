@@ -6,6 +6,10 @@ type t = Point.t * Point.t
 
 let empty = (Point.origin, Point.origin)
 
+let ll t = fst t
+
+let ur t = snd t
+
 let is_in (x0, y0) ((x0', y0'), (x1', y1')) =
   let x_in = x0 >= x0' && x0 <= x1' in
   let y_in = y0 >= y0' && y0 <= y1' in 

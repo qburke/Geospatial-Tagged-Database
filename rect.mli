@@ -6,6 +6,12 @@ type t = Point.t * Point.t
 (** [empty] is an empty Rect representation. *)
 val empty : t
 
+(** [ll t] is the lower left corner of [t]. *)
+val ll : t -> Point.t
+
+(** [ur t] is the upper right corner of [t]. *)
+val ur : t -> Point.t
+
 (** [is_in] checks if [pt] is inside of [rect].*)
 val is_in : Point.t -> t -> bool
 
