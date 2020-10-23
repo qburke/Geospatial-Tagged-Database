@@ -43,7 +43,7 @@ let empty_node () = {
   children = `Node [];
 }
 
-let root () = {
+let empty () = {
   parent = None;
   mbr = Rect.empty;
   children = `Node [];
@@ -64,8 +64,13 @@ let value (n : 'a t) : 'a =
   | `Node _ -> failwith "Should not be here"
   | `Entry e -> e
 
-let node_append (`Node children) (box) =
-  `Node (box :: children)
+let node_append box n =
+  match n.children with 
+  | `Node lst -> n.children <- `Node (box :: lst)
+  | `Entry _ -> failwith "Should not be here"
+
+let mbr_of_children (n : 'a t) : Rect.t list =
+  List.map (fun c -> c.mbr) (children n)
 
 (* let leaf_append (Leaf leaf) (entry) = 
    Leaf (entry :: leaf) *)
@@ -189,7 +194,6 @@ let rec handle_overflow (n : ('a t)) : unit =
   let u, u' = n |> children |> split in
   if n.parent = None then
     (* update children of n to be first result of split *)
-    (* update bounding box of n *)
     let n' = {
       parent = Some n;
       mbr = Rect.empty; (* FIXME *)
@@ -201,16 +205,19 @@ let rec handle_overflow (n : ('a t)) : unit =
       mbr = Rect.empty; (* FIXME *)
       children = `Node u';
     } in
+    n''.mbr <- n'' |> mbr_of_children |> Rect.mbr_of_list;
+    (* update bounding box of n *)
+    n'.mbr <- n' |> mbr_of_children |> Rect.mbr_of_list; (* TODO factor out *)
     (* add new node to parent *)
     n.children <- `Node (n' :: n'' :: []);
     (* update bounding box of parent*)
-    n.mbr <- Rect.empty (* FIXME *)
+    n.mbr <- n |> mbr_of_children |> Rect.mbr_of_list;
   else
     let w = parent n in
     (* update children of n to be first result of split *)
     n.children <- `Node u;
     (* update bounding box of n *)
-    n.mbr <- Rect.empty; (* FIXME *)
+    n.mbr <- n |> mbr_of_children |> Rect.mbr_of_list; (* FIXME *)
     (* create new node n' around second result of split *)
     let n' = {
       parent = Some n;
@@ -220,7 +227,7 @@ let rec handle_overflow (n : ('a t)) : unit =
     (* add new node to parent *)
     w.children <- `Node (n' :: children w);
     (* update bounding box of parent *)
-    w.mbr <- w |> children |> Rect.mbr; (* FIXME *)
+    w.mbr <- w |> mbr_of_children |> Rect.mbr_of_list; (* FIXME *)
     (* handle_overflow if necessary*)
     if w |> children |> List.length > max_boxes then
       handle_overflow w
@@ -228,31 +235,33 @@ let rec handle_overflow (n : ('a t)) : unit =
 (* [choose_subtree p n] is the child of [n] that requires the minimum increase
    in perimeter to cover [p]. The minimum increase in area is the tie-breaker.*)
 let choose_subtree (p : ('a t)) (n : ('a t)) : 'a t =
-  let child_enlargement c =
-    (c.mbr |> Rect.enlarge_rect_peri, c)
-  in let choices = List.map (child_enlarged) (n |> children)
-  in let compare_choices c1 c2 = fst c1 - fst c2
+  let enlarge_child c =
+    Rect.(c.mbr |> enlargement_rect p.mbr |> perimeter, c)
+  in let choices = List.map (enlarge_child) (n |> children)
+  in let compare_choices c1 c2 = fst c1 -. fst c2 |> ( *. ) 10.0 |> Float.to_int
   in let choices = List.sort (compare_choices) choices
-  in List.hd choices (* TODO tie breakers *)
-
-let add x tree =
-  let entry = {
-    parent = None;
-    mbr = Rect.empty (*FIXME*);
-    children = `Entry entry
-  }
-  in add_aux entry tree
+  in choices |> List.hd |> snd (* TODO tie breakers *)
 
 let rec add_aux entry node =
   match node.children with
-  | `Entry _ -> begin (* goes one deeper than necessary*)
-      entry.parent := parent node;
-      node |> parent |> node_append entry; 
-      if node |> parent |> List.length > max_entries then
-        handle_overflow parent
+  | `Entry _ -> (* goes one deeper than necessary*)
+    let pnode = parent node
+    in let entry = {entry with parent = Some pnode }
+    in begin
+      node_append entry pnode; 
+      if pnode |> children |> List.length > max_entries then
+        handle_overflow pnode
       else ()
     end
-  | `Node lst -> add entry (choose_subtree entry node)
+  | `Node lst -> add_aux entry (choose_subtree entry node)
+
+let add p x tree =
+  let entry = {
+    parent = None;
+    mbr = Rect.of_point p;
+    children = `Entry x
+  }
+  in add_aux entry tree
 
 let remove = failwith "Unimplemented"
 

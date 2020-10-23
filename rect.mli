@@ -9,16 +9,23 @@ val empty : t
 (** [is_in] checks if [pt] is inside of [rect].*)
 val is_in : Point.t -> t -> bool
 
+(** [of_point p] is the MBR containing point [p].*)
+val of_point : Point.t -> t
+
 (** [area rect] calculates the area of [rect].*)
 val area : t -> float
+
+(** [perimeter rect] calculates the perimeter of [rect].*)
+val perimeter : t -> float
 
 (** [enlargement_pt (x0, y0) ((x0', y0'), (x1', y1'))] checks if 
     pt [(x0, y0)] is in rect [((x0', y0'), (x1', y1'))] 
     and returns enlargement area and new or existing rect. *)
-val enlargement_pt : Point.t -> t -> t * float
+(*val enlargement_pt : Point.t -> t -> t * float*)
 
-(** [enlargement_rect ((x0, y0), (x1, y1)) ((x0', y0'), (x1', y1'))]   
-    calculates enlargement area from adding rect' to rect and 
-    the new rect containing both.*)
-val enlargement_rect : t -> t -> t * float
+(** [enlargement_rect rect1 rect2] is the new bounding box and the 
+    after adding [rect2] to [rect1]. *)
+val enlargement_rect : t -> t -> t
 
+(** [mbr_of_list lst] is the MBR of the the rectangles in [lst].*)
+val mbr_of_list : t list -> t

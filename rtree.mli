@@ -5,10 +5,10 @@
 type 'a t
 
 (** [empty ()] is the empty R Tree. *)
-val empty : 'a t
+val empty : unit -> 'a t
 
 (** [add x r] modifies [r] to include [x]. Requires [x] not in [r]. *)
-val add : 'a -> 'a t -> unit
+val add : Point.t -> 'a -> 'a t -> unit
 
 (** [remove x r] removes [x] from [r]. Leaves [r] unchanged if [x]
     not in [r]. *)
