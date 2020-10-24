@@ -83,7 +83,7 @@ let sort_subtree_x (lst: 'a t list) (sort_x: bool) : 'a t list =
 
 let ceil_int n  = n |> ceil |> int_of_float
 
-(* [split n] is the result of splitting [n],  *) 
+(* [split n] is the result of splitting [n]  *) 
 let split (n : 'a t list) : ('a t list * 'a t list) =
   let m = float_of_int (List.length n) in
   let sorted_lsts = [sort_subtree_x n true; sort_subtree_x n false] in
