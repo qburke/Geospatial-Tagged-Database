@@ -58,7 +58,8 @@ let new_tree p x =
       parent = Some root;
       mbr = Rect.of_point p;
       children = `Entry x
-    } :: [])
+    } :: []);
+  root
 
 let parent (n : 'a t) : 'a t =
   match n.parent with
