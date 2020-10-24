@@ -76,7 +76,7 @@ let compare_mbr (obj1: 'a t) (obj2: 'a t) : int =
 
 let split_at (n : int) (lst : 'a list) : ('a list * 'a list) = 
   let rec helper n lst acc = 
-    if n = 0 then ([], lst) else
+    if n = 0 then (acc, lst) else
       match lst with
       | [] -> (acc, [])
       | h :: t -> helper (n - 1) t (h::acc) in
@@ -85,13 +85,17 @@ let split_at (n : int) (lst : 'a list) : ('a list * 'a list) =
 let sort_subtree (lst: 'a t list) = 
   List.sort compare_mbr lst
 
+let sort_subtree_x (lst: 'a t list) (sort_x: bool) : 'a t list = 
+  List.sort (compare_mbr_x sort_x) lst
+
 let ceil_int n  = n |> ceil |> int_of_float
 
 (* Perhaps would be easier to split arrays rather than nodes? *)
 (* [split n] is the result of splitting [n],  *) 
 let split (n : 'a t list) : ('a t list * 'a t list) =
   let m = float_of_int (List.length n) in
-  let sorted_by = [sort_subtree n true; sort_subtree n false] in
+  let sorted_lsts = [sort_subtree_x n true; sort_subtree_x n false] in
+  (* let sorted_y = sort_subtree n false in *)
   let start_idx = ceil_int (0.25 *. float_of_int max_boxes) in
   let end_idx = ceil_int (m -. 0.25 *. float_of_int max_boxes) in
   let min_perimeter_sum = ref max_float in
@@ -103,7 +107,6 @@ let split (n : 'a t list) : ('a t list * 'a t list) =
         and y-wise split from start_idx to end_idx and update the min_perimeter 
         and min_split accordingly.
         *)
-      let sorted_lsts = [] in
       let s, s' = split_at i (List.nth sorted_lsts j) in 
       let mbr_s = s |> List.map (fun x -> x.mbr) |> Rect.mbr_of_list in 
       let mbr_s' = s' |> List.map (fun x -> x.mbr) |> Rect.mbr_of_list in
