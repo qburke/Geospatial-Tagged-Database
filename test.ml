@@ -50,11 +50,16 @@ let rect_tests = [
 ]
 
 open Rtree
-let int_tree_1 = empty 0
+let int_tree_1 = new_tree (0.,0.) 0
 let () = add (1., 2.) 3 int_tree_1
 let () = add (4., 2.) 3110 int_tree_1
 let () = add (1.1, 2.1) 5 int_tree_1
 let () = add (0.9, 1.9) 64 int_tree_1
+
+let int_tree_2 = new_tree (0., 0.) 0
+let () = for i=0 to 10 do
+    add (float_of_int i, float_of_int i) (i) int_tree_2
+  done
 
 let mem_test
     (name : string)
@@ -64,6 +69,13 @@ let mem_test
     (expected_output : bool) : test =
   name >:: (fun _ ->
       assert_equal expected_output (mem loc data tree) ~printer:string_of_bool)
+
+let out_json_test
+    (name : string)
+    (filename : string)
+    (tree : 'a t) : test =
+  name >:: (fun _ ->
+      assert_equal () (tree |> to_json |> Yojson.Basic.to_file filename))
 
 let rtree_tests = [
   mem_test "3 at (1., 2.) in int_tree_1" (1., 2.) 3 int_tree_1 true;
