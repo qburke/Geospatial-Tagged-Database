@@ -44,6 +44,7 @@ let empty_leaf par = {
 
 let empty emp = 
   {
+<<<<<<< HEAD
     parent = None;
     mbr = Rect.empty;
     children = `Node [];
@@ -59,6 +60,12 @@ let new_tree p x =
       mbr = Rect.of_point p;
       children = `Entry x
     } :: [])
+=======
+    parent = None;
+    mbr = Rect.empty;
+    children = `Node [];
+  }
+>>>>>>> 15ee27cf5bcc5d56ae02a9ac6bb0024b55a50e01
 
 let parent (n : 'a t) : 'a t =
   match n.parent with
