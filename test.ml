@@ -2,6 +2,11 @@ open OUnit2
 open Point
 open Rect
 
+let rec ints_from_to lb ub =
+  match lb = ub with
+  | true -> []
+  | false -> lb :: ints_from_to (lb + 1) ub
+
 let origin_pt = Point.origin
 let empty_rect = Rect.empty
 let pt1 = (1., 2.)
@@ -41,12 +46,24 @@ let enlargement_rect_test
       assert_equal expected_output (enlargement_rect rect rect') 
         ~printer:rect_printer)
 
+let mbr_of_list_test
+    (name : string)
+    (lst : Rect.t list)
+    (expected_output: Rect.t) : test =
+  name >:: (fun _ ->
+      assert_equal expected_output (mbr_of_list lst) ~printer:rect_printer)
+
+let points_1 = List.map
+    (fun i -> Rect.of_point (float_of_int i, float_of_int i)) (ints_from_to 0 10)
+
 let rect_tests = [
   (*enlargement_pt_test "empty" origin_pt empty_rect (empty_rect, 0.);
     enlargement_pt_test "origin pt" origin_pt rect1 (((0., 0.), (2., 3.)), 4.);
     enlargement_pt_test "pt1 rect1" pt1 rect1 (rect1, 0.);
     enlargement_pt_test "pt3 rect1" pt3 rect1 (((1., 2.), (2., 8.)), 5.);*)
-  enlargement_rect_test "rect1 rect2" rect1 rect2 ((1., 2.), (2., 8.))
+  enlargement_rect_test "rect1 rect2" rect1 rect2 ((1., 2.), (2., 8.));
+  enlargement_rect_test "rect1 rect2" Rect.empty ((3., 3.), (3., 3.)) ((0., 0.), (3., 3.));
+  mbr_of_list_test "MBR of points (0,0) to (9,9) is (0,0), (9,9)" points_1 ((0., 0.), (9., 9.))
 ]
 
 open Rtree
@@ -56,10 +73,31 @@ let () = add (4., 2.) 3110 int_tree_1
 let () = add (1.1, 2.1) 5 int_tree_1
 let () = add (0.9, 1.9) 64 int_tree_1
 
+let entries_of_int_range lst =
+  List.map (fun i -> ((float_of_int i, float_of_int i), i)) lst
+
 let int_tree_2 = new_tree (0., 0.) 0
-let () = for i=0 to 10 do
-    add (float_of_int i, float_of_int i) (i) int_tree_2
-  done
+let int_tree_2_entries = 10 |> ints_from_to 0 |> entries_of_int_range
+
+
+(* let split_test 
+    (name : string)
+    (s : 'a t list) 
+    (expected_output : (Rect.t list * Rect.t list)) : test =
+   name >:: (fun _ ->
+      assert_equal expected_output (split x) ~printer:string_of_bool) *)
+
+
+let add_test
+    (name : string)
+    (entries : (Point.t * 'a) list)
+    (tree : 'a t) : test list =
+  List.map
+    (fun (p, x) ->
+       name >:: (fun _ ->
+           assert_equal () (add p x tree))
+    )
+    entries
 
 let mem_test
     (name : string)
@@ -70,6 +108,17 @@ let mem_test
   name >:: (fun _ ->
       assert_equal expected_output (mem loc data tree) ~printer:string_of_bool)
 
+let mem_list_test
+    (name : string)
+    (entries : (Point.t * 'a) list)
+    (tree : 'a t) : test list =
+  List.map
+    (fun (p, x) ->
+       name >:: (fun _ ->
+           assert_equal true (mem p x tree) ~printer:string_of_bool)
+    )
+    entries
+
 let out_json_test
     (name : string)
     (filename : string)
@@ -77,14 +126,21 @@ let out_json_test
   name >:: (fun _ ->
       assert_equal () (tree |> to_json |> Yojson.Basic.to_file filename))
 
-let rtree_tests = [
-  mem_test "3 at (1., 2.) in int_tree_1" (1., 2.) 3 int_tree_1 true;
-  mem_test "3110 at (4., 2.) in int_tree_1" (4., 2.) 3110 int_tree_1 true;
-  mem_test "5 at (1.1, 2.1) in int_tree_1" (1.1, 2.1) 5 int_tree_1 true;
-  mem_test "64 at (0.9, 1.9) in int_tree_1" (0.9, 1.9) 64 int_tree_1 true;
-  mem_test "5 not at (1., 2.) in int_tree_1" (1., 2.) 5 int_tree_1 false;
-  mem_test "64 not at (1., 2.) in int_tree_1" (1., 2.) 64 int_tree_1 false;
-]
+let rtree_tests = List.flatten [
+    [
+      mem_test "3 at (1., 2.) in int_tree_1" (1., 2.) 3 int_tree_1 true;
+      mem_test "3110 at (4., 2.) in int_tree_1" (4., 2.) 3110 int_tree_1 true;
+      mem_test "5 at (1.1, 2.1) in int_tree_1" (1.1, 2.1) 5 int_tree_1 true;
+      mem_test "64 at (0.9, 1.9) in int_tree_1" (0.9, 1.9) 64 int_tree_1 true;
+      mem_test "5 not at (1., 2.) in int_tree_1" (1., 2.) 5 int_tree_1 false;
+      mem_test "64 not at (1., 2.) in int_tree_1" (1., 2.) 64 int_tree_1 false;
+    ];
+    add_test "Add 10 records to int_tree_2" int_tree_2_entries int_tree_2;
+    mem_list_test "Check 10 records are in int_tree_2" int_tree_2_entries int_tree_2;
+    [
+      out_json_test "int_tree_2 out to int_tree_2.json" "int_tree_2.json" int_tree_2;
+    ]
+  ]
 
 let suite =
   "test suite for final_project"  >::: List.flatten [

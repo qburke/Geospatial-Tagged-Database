@@ -125,7 +125,6 @@ let split_leaf u
         if this is the best split so far
 	return the best split found
 
-
 let split_node u =
 	m = the number of points in u
   repeat following for right boundaries on x-dim and w.r.t to y-dim
@@ -162,10 +161,6 @@ add
     p :: u
   else 
 
-
-insert (p, u)
-	if u is leaf then
-  	add p to u
   if u overflows then
   	handle_overflow u
   else
@@ -173,12 +168,15 @@ insert (p, u)
     insert p v
  *)
 
-let compare_mbr (compare_x : bool) (x1: 'a t) (x2 : 'a t) : int = 
+let compare_mbr_x (compare_x : bool) (x1: 'a t) (x2 : 'a t) : int = 
   let p1 = fst x1.mbr in 
-  let p2 = fst x1.mbr in
+  let p2 = fst x2.mbr in
   let c1 = if compare_x then fst p1 else snd p1 in
   let c2 = if compare_x then fst p2 else snd p2 in
   Stdlib.compare c1 c2
+
+let compare_mbr (obj1: 'a t) (obj2: 'a t) : int =
+  Stdlib.compare (area obj1.mbr) (area obj2.mbr)
 
 let split_at (n : int) (lst : 'a list) : ('a list * 'a list) = 
   let rec helper n lst acc = 
@@ -188,8 +186,11 @@ let split_at (n : int) (lst : 'a list) : ('a list * 'a list) =
       | h :: t -> helper (n - 1) t (h::acc) in
   helper n lst []
 
-let sort_subtree (lst: 'a t list) (sort_x: bool) : 'a t list = 
-  List.sort (compare_mbr sort_x) lst
+let sort_subtree (lst: 'a t list) = 
+  List.sort compare_mbr lst
+
+let sort_subtree_x (lst: 'a t list) (sort_x: bool) : 'a t list = 
+  List.sort (compare_mbr_x sort_x) lst
 
 let ceil_int n  = n |> ceil |> int_of_float
 
@@ -200,33 +201,35 @@ let ceil_int n  = n |> ceil |> int_of_float
 (* [split n] is the result of splitting [n],  *) 
 let split (n : 'a t list) : ('a t list * 'a t list) =
   let m = float_of_int (List.length n) in
-  let sorted_x = sort_subtree n true in
+  let sorted_by = [sort_subtree_x n true; sort_subtree_x n false] in
   (* let sorted_y = sort_subtree n false in *)
   let start_idx = ceil_int (0.25 *. float_of_int max_boxes) in
   let end_idx = ceil_int (m -. 0.25 *. float_of_int max_boxes) in
-  let min_perimeter_sum = ref 0. in
+  let min_perimeter_sum = ref max_float in
   let min_split = ref (n, n) in
-  (* TODO: iterate also for sorted_y list *)
-  for i = start_idx to end_idx do
-    (* 
-      compare sets of the first i sets and (m -i) sets for both x-wise split
-      and y-wise split from start_idx to end_idx and update the min_perimeter 
-      and min_split accordingly.
-      *)
-    let s, s' = split_at i sorted_x in 
-    let mbr_s = s |> List.map (fun x -> x.mbr) |> Rect.mbr_of_list in 
-    let mbr_s' = s' |> List.map (fun x -> x.mbr) |> Rect.mbr_of_list in
-    let new_perimeter_sum = (Rect.perimeter mbr_s) +. (Rect.perimeter mbr_s') in
-    if new_perimeter_sum < !min_perimeter_sum then 
-      min_perimeter_sum := new_perimeter_sum; 
-    min_split := (s, s')
+  for j = 0 to 1 do
+    for i = start_idx to end_idx do
+      (* 
+        compare sets of the first i sets and (m -i) sets for both x-wise split
+        and y-wise split from start_idx to end_idx and update the min_perimeter 
+        and min_split accordingly.
+        *)
+      let s, s' = split_at i (List.nth sorted_lsts j) in 
+      let mbr_s = s |> List.map (fun x -> x.mbr) |> Rect.mbr_of_list in 
+      let mbr_s' = s' |> List.map (fun x -> x.mbr) |> Rect.mbr_of_list in
+      let new_perimeter_sum = (Rect.perimeter mbr_s) +. (Rect.perimeter mbr_s') in
+      if new_perimeter_sum < !min_perimeter_sum then 
+        begin
+          min_perimeter_sum := new_perimeter_sum; 
+          min_split := (s, s')
+        end
+    done;
   done;
-  !min_split 
-
+  !min_split  
 
 
 (* [handle_overflow n] splits [n] into two bounding boxes n and n', updating the
-    children of n and its MBR, and adding n' to their shared parent.*)
+   children of n and its MBR, and adding n' to their shared parent.*)
 let rec handle_overflow (n : ('a t)) : unit =
   (* split the children of n to be n and n'*)
   let u, u' = n |> children |> split in
@@ -234,13 +237,13 @@ let rec handle_overflow (n : ('a t)) : unit =
     (* update children of n to be first result of split *)
     let n' = {
       parent = Some n;
-      mbr = Rect.empty; (* FIXME *)
+      mbr = Rect.empty;
       children = `Node u
     } in
     (* create new node n' around second result of split *)
     let n'' = {
       parent = Some n;
-      mbr = Rect.empty; (* FIXME *)
+      mbr = Rect.empty;
       children = `Node u';
     } in
     n''.mbr <- n'' |> mbr_of_children |> Rect.mbr_of_list;
@@ -274,11 +277,13 @@ let rec handle_overflow (n : ('a t)) : unit =
    in perimeter to cover [p]. The minimum increase in area is the tie-breaker.*)
 let choose_subtree (p : ('a t)) (n : ('a t)) : 'a t =
   let enlarge_child c =
-    Rect.(c.mbr |> enlargement_rect p.mbr |> perimeter, c)
-  in let choices = List.map (enlarge_child) (n |> children)
+    Rect.(c.mbr |> enlargement_rect p.mbr |> area, c)
+  in let choices = List.map (enlarge_child) (children n)
   in let compare_choices c1 c2 = fst c1 -. fst c2 |> ( *. ) 10.0 |> Float.to_int
   in let choices = List.sort (compare_choices) choices
-  in choices |> List.hd |> snd (* TODO tie breakers *)
+  in let choice = choices |> List.hd |> snd (* TODO tie breakers *)
+  in choice.mbr <- enlargement_rect choice.mbr p.mbr;
+  choice
 
 let rec add_aux entry node =
   match node.children with
@@ -286,7 +291,7 @@ let rec add_aux entry node =
     let pnode = parent node
     in let entry = {entry with parent = Some pnode }
     in begin
-      node_append entry pnode; 
+      node_append entry pnode;
       if pnode |> children |> List.length > max_entries then
         handle_overflow pnode
       else ()
