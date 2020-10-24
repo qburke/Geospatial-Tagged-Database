@@ -15,6 +15,9 @@ build:
 test:
 	$(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST)
 	
+zip:
+	zip ms1.zip *.ml* *.json _tags Makefile README.md
+
 docs: docs-public docs-private
 	
 docs-public: build

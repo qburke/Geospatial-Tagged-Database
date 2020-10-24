@@ -3,6 +3,7 @@ open Point
 open Rect
 open Db
 
+(** [ints_from_to x0 x1] is a list of ints from [x0] to [x1] exclusive. *)
 let rec ints_from_to lb ub =
   match lb = ub with
   | true -> []
@@ -29,6 +30,9 @@ let rect_printer = function
     "((" ^ string_of_float a ^ ", " ^ string_of_float b ^ "), (" 
     ^ string_of_float c ^ ", " ^ string_of_float d ^ "))"
 
+(** [enlargement_rect_test name r1 r2 expected_output] constructs an OUnit
+    test named [name] that asserts the quality of [expected_output]
+    with [enlargement_rect r1 r2]. *)
 let enlargement_rect_test 
     (name : string) 
     (rect : Rect.t) 
@@ -47,6 +51,9 @@ let make_db (elems : 'a element list) =
            (fun elem -> add db elem) elems);
   db
 
+(** [list_of_tags_test name db expected_output] constructs an OUnit
+    test named [name] that asserts the quality of [expected_output]
+    with [list_of_reverse_index db]. *)
 let list_of_tags_test
     (name : string)
     (db : 'a database)
@@ -56,6 +63,9 @@ let list_of_tags_test
         (List.sort compare expected_output)
         (list_of_reverse_index  db))
 
+(** [tag_contents_test name db tag expected_output] constructs an OUnit
+    test named [name] that asserts the quality of [expected_output]
+    with [list_of_tag_collection db tag]. *)
 let tag_contents_test
     (name : string)
     (db : 'a database)
@@ -67,6 +77,9 @@ let tag_contents_test
         (list_of_tag_collection db tag |>
          List.map data_of_element |> List.sort compare))
 
+(** [tag_search_test name db objects tags expected_output] constructs an OUnit
+    test named [name] that asserts the quality of [expected_output]
+    with [tag_search_test db objects tags]. *)
 let tag_search_test
     (name : string)
     (db : 'a database)
@@ -123,6 +136,9 @@ let db_tests =  [
     ["tag2"] ["obj2";"obj3"; "obj4"]
 ]
 
+(** [mbr_of_list_test name lst expected_output] constructs an OUnit
+    test named [name] that asserts the quality of [expected_output]
+    with [mbr_of_list lst]. *)
 let mbr_of_list_test
     (name : string)
     (lst : Rect.t list)
@@ -155,26 +171,29 @@ let entries_of_int_range lst =
 let int_tree_2 = new_tree (0., 0.) 0
 let int_tree_2_entries = 10 |> ints_from_to 0 |> entries_of_int_range
 
+let int_tree_3 = new_tree (0., 0.) 0
+let () = List.iter (fun (p, x) -> add p x int_tree_3) int_tree_2_entries
 
-(* let split_test 
-    (name : string)
-    (s : 'a t list) 
-    (expected_output : (Rect.t list * Rect.t list)) : test =
-   name >:: (fun _ ->
-      assert_equal expected_output (split x) ~printer:string_of_bool) *)
-
-
+(** [add_test name entries tree dir file expected_output] constructs an OUnit
+    test named [name] that asserts that adding each element in [entries] to
+    [tree] was successful. *)
 let add_test
     (name : string)
     (entries : (Point.t * 'a) list)
     (tree : 'a t) : test list =
-  List.map
-    (fun (p, x) ->
-       name >:: (fun _ ->
-           assert_equal () (add p x tree))
+  List.mapi
+    (fun i (p, x) ->
+       name >::
+       (fun _ -> begin
+            add p x tree;
+            assert_equal true (mem p x tree) ~printer:string_of_bool
+          end)
     )
     entries
 
+(** [remove_test name entries tree expected_output] constructs an OUnit
+    test named [name] that asserts that removing each element in [entries] to
+    [tree] returns [unit]. *)
 let remove_test 
     (name : string)
     (entries : (Point.t * 'a) list)
@@ -189,8 +208,8 @@ let remove_test
 let find_test 
     (name : string)
     (entries : (Point.t * 'a) list)
-    (output : bool * 'a Rtree.t)
-    (tree : 'a t) : test list =
+    (tree : 'a t)
+    (output : bool * 'a Rtree.t) : test list =
   List.map
     (fun (p, x) ->
        name >:: (fun _ ->
@@ -198,6 +217,9 @@ let find_test
     )
     entries
 
+(** [mem_test name p x tree expected_output] constructs an OUnit
+    test named [name] that asserts the quality of [expected_output]
+    with [mem p x tree]. *)
 let mem_test
     (name : string)
     (loc : Point.t)
@@ -207,6 +229,8 @@ let mem_test
   name >:: (fun _ ->
       assert_equal expected_output (mem loc data tree) ~printer:string_of_bool)
 
+(** [mem_test name p x tree expected_output] constructs an OUnit
+    test named [name] that asserts each entry is a member of [tree]. *)
 let mem_list_test
     (name : string)
     (entries : (Point.t * 'a) list)
@@ -218,6 +242,8 @@ let mem_list_test
     )
     entries
 
+(** [out_json_test name filname tree] constructs an OUnit test named [name] that
+    outputs the JSON representation of [tree] to [filename]. *)
 let out_json_test
     (name : string)
     (filename : string)
@@ -239,11 +265,11 @@ let rtree_tests = List.flatten [
 
     ];
     add_test "Add 10 records to int_tree_2" int_tree_2_entries int_tree_2;
-    mem_list_test "Check 10 records are in int_tree_2" int_tree_2_entries 
-      int_tree_2;
+    mem_list_test "Check 10 records are in int_tree_3" int_tree_2_entries 
+      int_tree_3;
     [
-      out_json_test "int_tree_2 out to int_tree_2.json" "int_tree_2.json" 
-        int_tree_2;
+      out_json_test "int_tree_3 out to int_tree_3.json" "int_tree_3.json" 
+        int_tree_3;
     ]
   ]
 
