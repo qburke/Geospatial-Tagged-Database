@@ -66,7 +66,7 @@ let node_remove node entry =
 let mbr_of_children (n : 'a t) : Rect.t list =
   List.map (fun c -> c.mbr) (children n)
 
-let compare_mbr (compare_x : bool) (x1: 'a t) (x2 : 'a t) : int = 
+let compare_mbr_x (compare_x : bool) (x1: 'a t) (x2 : 'a t) : int = 
   let p1 = fst x1.mbr in 
   let p2 = fst x2.mbr in
   let c1 = if compare_x then fst p1 else snd p1 in
