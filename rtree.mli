@@ -16,10 +16,14 @@ val add : Point.t -> 'a -> 'a t -> unit
 
 (** [remove x r] removes [x] from [r]. Leaves [r] unchanged if [x]
     not in [r]. *)
-val remove : 'a -> 'a t -> unit
+val remove : Point.t -> 'a -> 'a t -> unit
 
 (** [mem p x r] is [true] if [x] is in [r] at location [x]*)
 val mem : Point.t -> 'a -> 'a t -> bool
+
+(** [find x t] traverses tree [t] for a given Entry [x] and returns the Entry 
+    (leaf) that contains it. *)
+val find : Point.t -> 'a -> 'a t -> bool * 'a t
 
 (** [union r1 r2] returns the set union of [r1] and [r2].
     [r1] contains less than or equal to elements than [r2].

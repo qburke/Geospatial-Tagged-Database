@@ -21,12 +21,11 @@ let empty_leaf par = {
   children = `Entry None;
 }
 
-let empty emp = 
-  {
-    parent = None;
-    mbr = Rect.empty;
-    children = `Node [];
-  }
+let empty emp = {
+  parent = None;
+  mbr = Rect.empty;
+  children = `Node [];
+}
 
 let new_tree p x = 
   let root = {
@@ -60,10 +59,14 @@ let node_append box n =
   | `Node lst -> n.children <- `Node (box :: lst)
   | `Entry _ -> failwith "Cannot append to an Entry"
 
+(**[node_remove node entry] removes an [entry] from a [node]. *)
+let node_remove node entry =
+  List.filter (fun el -> el != entry) (children node)
+
 let mbr_of_children (n : 'a t) : Rect.t list =
   List.map (fun c -> c.mbr) (children n)
 
-let compare_mbr_x (compare_x : bool) (x1: 'a t) (x2 : 'a t) : int = 
+let compare_mbr (compare_x : bool) (x1: 'a t) (x2 : 'a t) : int = 
   let p1 = fst x1.mbr in 
   let p2 = fst x2.mbr in
   let c1 = if compare_x then fst p1 else snd p1 in
@@ -96,16 +99,15 @@ let split (n : 'a t list) : ('a t list * 'a t list) =
       let s, s' = split_at i (List.nth sorted_lsts j) in 
       let mbr_s = s |> List.map (fun x -> x.mbr) |> Rect.mbr_of_list in 
       let mbr_s' = s' |> List.map (fun x -> x.mbr) |> Rect.mbr_of_list in
-      let new_perimeter_sum = (Rect.perimeter mbr_s) +. (Rect.perimeter mbr_s') in
-      if new_perimeter_sum < !min_perimeter_sum then 
-        begin
-          min_perimeter_sum := new_perimeter_sum; 
-          min_split := (s, s')
-        end
+      let new_perimeter_sum = (Rect.perimeter mbr_s) +. (Rect.perimeter mbr_s') 
+      in
+      if new_perimeter_sum < !min_perimeter_sum then begin
+        min_perimeter_sum := new_perimeter_sum; 
+        min_split := (s, s')
+      end
     done;
   done;
-  !min_split  
-
+  !min_split 
 
 (* [handle_overflow n] splits [n] into two bounding boxes n and n', updating the
    children of n and its MBR, and adding n' to their shared parent.*)
@@ -169,6 +171,7 @@ let rec add_aux entry node =
     in let entry = {entry with parent = Some pnode }
     in begin
       node_append entry pnode;
+      (* when overflow, then split*)
       if pnode |> children |> List.length > max_entries then
         handle_overflow pnode
       else ()
@@ -186,7 +189,46 @@ let add p x tree =
   }
   in add_aux entry tree
 
-let remove x t = ()
+(** [find_aux entry node] begins at root [node] and searches for Entry that 
+    matches [entry] *)
+let rec find_aux entry node =
+  match node.children with
+  | `Entry _ -> begin
+      if (entry.mbr = node.mbr && entry.children = node.children) 
+      then true, node
+      else failwith "Entry [entry] cannot be found."
+    end
+  | `Node lst -> begin
+      find_aux entry (choose_subtree entry node)
+    end
+
+let find p x tree = 
+  (* entry is node to be find *)
+  let entry = {
+    parent = None;
+    mbr = Rect.of_point p;
+    children = `Entry x
+  }
+  in try find_aux entry tree with
+  | exc -> false, entry
+
+let rec propagate_mbr node = 
+  let parent_node = node.parent in
+  ignore (node.mbr <- Rect.mbr_of_list (mbr_of_children node));
+  match parent_node with 
+  | None -> ()
+  | Some p -> propagate_mbr p
+
+(* remove does not currently support collapsing--removing level case *)
+let remove p x tree = 
+  let found, node = find p x tree in 
+  match found with 
+  | true -> begin
+      let parent_node = parent node in 
+      ignore (node_remove parent_node node);
+      propagate_mbr parent_node;
+    end
+  | false -> ()
 
 let union t1 t2 = empty ()
 
@@ -217,4 +259,4 @@ let rec mem_aux p x = function
     end
   | [] -> false
 
-let mem p x r = mem_aux p x [r] 
+let mem p x r = mem_aux p x [r]
