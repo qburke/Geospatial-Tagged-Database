@@ -197,6 +197,7 @@ let ceil_int n  = n |> ceil |> int_of_float
 (* let perimeter_sum (n : 'a t list) : float = 
    List.fold_left (fun acc x -> acc +. (Rect.perimeter x.mbr)) 0. n  *)
 
+
 (* Perhaps would be easier to split arrays rather than nodes? *)
 (* [split n] is the result of splitting [n],  *) 
 let split (n : 'a t list) : ('a t list * 'a t list) =
@@ -214,6 +215,7 @@ let split (n : 'a t list) : ('a t list * 'a t list) =
         and y-wise split from start_idx to end_idx and update the min_perimeter 
         and min_split accordingly.
         *)
+      let sorted_lsts = [] in
       let s, s' = split_at i (List.nth sorted_lsts j) in 
       let mbr_s = s |> List.map (fun x -> x.mbr) |> Rect.mbr_of_list in 
       let mbr_s' = s' |> List.map (fun x -> x.mbr) |> Rect.mbr_of_list in
@@ -281,9 +283,7 @@ let choose_subtree (p : ('a t)) (n : ('a t)) : 'a t =
   in let choices = List.map (enlarge_child) (children n)
   in let compare_choices c1 c2 = fst c1 -. fst c2 |> ( *. ) 10.0 |> Float.to_int
   in let choices = List.sort (compare_choices) choices
-  in let choice = choices |> List.hd |> snd (* TODO tie breakers *)
-  in choice.mbr <- enlargement_rect choice.mbr p.mbr;
-  choice
+  in choices |> List.hd |> snd (* TODO tie breakers *)
 
 let rec add_aux entry node =
   match node.children with
@@ -296,7 +296,10 @@ let rec add_aux entry node =
         handle_overflow pnode
       else ()
     end
-  | `Node lst -> add_aux entry (choose_subtree entry node)
+  | `Node lst -> begin
+      node.mbr <- enlargement_rect node.mbr entry.mbr;
+      add_aux entry (choose_subtree entry node)
+    end
 
 let add p x tree =
   let entry = {
