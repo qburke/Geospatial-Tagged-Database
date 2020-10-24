@@ -33,20 +33,20 @@ type ('a, 'b) leaf_or_node =
 type 'a t = {
   parent: 'a t option;
   mutable mbr: Rect.t;
-  mutable children: [`Node of 'a t list | `Entry of 'a]
+  mutable children: [`Node of 'a t list | `Entry of 'a option]
 }
 
 
-let empty_node () = {
+let empty_leaf () = {
   parent = None;
   mbr = Rect.empty;
-  children = `Node [];
+  children = `Entry None;
 }
 
 let empty () = {
   parent = None;
   mbr = Rect.empty;
-  children = `Node [];
+  children = `Node [empty_leaf ()];
 }
 
 let parent (n : 'a t) : 'a t =
@@ -57,17 +57,18 @@ let parent (n : 'a t) : 'a t =
 let children (n : 'a t) : 'a t list =
   match n.children with
   | `Node lst -> lst
-  | `Entry _ -> failwith "Should not be here"
+  | `Entry _ -> failwith "Entry does not have children"
 
 let value (n : 'a t) : 'a =
   match n.children with
-  | `Node _ -> failwith "Should not be here"
-  | `Entry e -> e
+  | `Node _ -> failwith "Node does not have a value"
+  | `Entry Some e -> e
+  | `Entry None -> failwith "Tried to access the anchor"
 
 let node_append box n =
   match n.children with 
   | `Node lst -> n.children <- `Node (box :: lst)
-  | `Entry _ -> failwith "Should not be here"
+  | `Entry _ -> failwith "Cannot append to an Entry"
 
 let mbr_of_children (n : 'a t) : Rect.t list =
   List.map (fun c -> c.mbr) (children n)
@@ -259,13 +260,13 @@ let add p x tree =
   let entry = {
     parent = None;
     mbr = Rect.of_point p;
-    children = `Entry x
+    children = `Entry (Some x)
   }
   in add_aux entry tree
 
-let remove = failwith "Unimplemented"
+let remove x t = ()
 
-let union = failwith "Unimplemented"
+let union t1 t2 = empty ()
 
-let inter = failwith "Unimplemented"
+let inter t1 t2 = empty ()
 

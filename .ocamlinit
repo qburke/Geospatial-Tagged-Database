@@ -1,3 +1,7 @@
 #require "ounit2";;
+#require "yojson";;
 #require "ANSITerminal";;
 #directory "_build";;
+#load "point.cmo";;
+#load "rect.cmo";;
+#load "rtree.cmo";;
