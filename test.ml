@@ -49,9 +49,29 @@ let rect_tests = [
   enlargement_rect_test "rect1 rect2" rect1 rect2 ((1., 2.), (2., 8.))
 ]
 
+open Rtree
+let int_tree_1 = empty 0
+let () = add (1., 2.) 3 int_tree_1
+let () = add (4., 2.) 3110 int_tree_1
+let () = add (1.1, 2.1) 5 int_tree_1
+let () = add (0.9, 1.9) 64 int_tree_1
+
+let mem_test
+    (name : string)
+    (loc : Point.t)
+    (data : 'a)
+    (tree : 'a t)
+    (expected_output : bool) : test =
+  name >:: (fun _ ->
+      assert_equal expected_output (mem loc data tree) ~printer:string_of_bool)
 
 let rtree_tests = [
-
+  mem_test "3 at (1., 2.) in int_tree_1" (1., 2.) 3 int_tree_1 true;
+  mem_test "3110 at (4., 2.) in int_tree_1" (4., 2.) 3110 int_tree_1 true;
+  mem_test "5 at (1.1, 2.1) in int_tree_1" (1.1, 2.1) 5 int_tree_1 true;
+  mem_test "64 at (0.9, 1.9) in int_tree_1" (0.9, 1.9) 64 int_tree_1 true;
+  mem_test "5 not at (1., 2.) in int_tree_1" (1., 2.) 5 int_tree_1 false;
+  mem_test "64 not at (1., 2.) in int_tree_1" (1., 2.) 64 int_tree_1 false;
 ]
 
 let suite =

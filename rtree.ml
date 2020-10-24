@@ -18,14 +18,14 @@ type ('a, 'b) leaf_or_node =
 type 'a t = {
   parent: 'a t option;
   mutable mbr: Rect.t;
-  mutable children: [`Node of 'a t list | `Entry of 'a option]
+  mutable children: [`Node of 'a t list | `Entry of 'a]
 }
 
 
 let empty_leaf emp par = {
   parent = Some par;
   mbr = Rect.empty;
-  children = `Entry (Some emp);
+  children = `Entry emp;
 }
 
 let empty emp = 
@@ -49,8 +49,7 @@ let children (n : 'a t) : 'a t list =
 let value (n : 'a t) : 'a =
   match n.children with
   | `Node _ -> failwith "Node does not have a value"
-  | `Entry Some e -> e
-  | `Entry None -> failwith "Tried to access the anchor"
+  | `Entry e -> e
 
 let node_append box n =
   match n.children with 
@@ -267,7 +266,7 @@ let add p x tree =
   let entry = {
     parent = None;
     mbr = Rect.of_point p;
-    children = `Entry (Some x)
+    children = `Entry x
   }
   in add_aux entry tree
 
@@ -290,3 +289,16 @@ let rec json_of_t t = Yojson.Basic.(
   )
 
 let to_json tree = Yojson.Basic.(`Assoc [("rtree", json_of_t tree)])
+
+let choose_subtree p node =
+  List.filter (fun c -> Rect.is_in p c.mbr) (children node)
+
+let rec mem_aux p x = function
+  | node :: t -> begin
+      match node.children with
+      | `Node lst -> mem_aux p x (choose_subtree p node)
+      | `Entry e -> x = e || mem_aux p x t
+    end
+  | [] -> false
+
+let mem p x r = mem_aux p x [r]
