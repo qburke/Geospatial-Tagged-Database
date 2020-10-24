@@ -260,3 +260,39 @@ let rec mem_aux p x = function
   | [] -> false
 
 let mem p x r = mem_aux p x [r]
+
+open Yojson.Basic.Util
+
+(** [unwrap_str_list lst] is the string list of tags of the given Yojson string
+    list [lst] of tags. *)
+let unwrap_str_list lst = 
+  List.map (fun x -> to_string x) lst
+
+(** [from_entity e] is a representation of a single data point. *)
+let from_entity 
+    (e : Yojson.Basic.t) : (Point.t * string list) =
+  let lat = e |> member "latitude" |> to_float in
+  let long = e|> member "longitude" |> to_float in
+  let tags = e |> member "tags" |> to_list |> unwrap_str_list in
+  ((lat, long), tags)
+
+(** [from_json f] is the data read from a JSON file [f], containing the 
+    coordinates and the tags of the points stored in the JSON.
+    Required: [f] is a name of a valid json representation of data. *)
+let from_json f  =
+  let data_list = 
+    f 
+    |> Yojson.Basic.from_file 
+    |> to_list
+    |> List.map from_entity in 
+  match data_list with
+  | [] -> failwith "No data in target JSON"
+  | x::[] -> new_tree (fst x) (snd x)
+  | x::xs -> begin 
+    let res = new_tree (fst x) (snd x) in 
+    List.iter (fun x -> add (fst x) (snd x) res) xs;
+    res
+    end
+
+
+

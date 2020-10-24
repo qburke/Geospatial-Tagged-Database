@@ -38,4 +38,8 @@ val find : Point.t -> 'a -> 'a t -> bool * 'a t
 (** [to_json t] is the JSON representation of [t]. See R Tree schema. *)
 val to_json : 'a t -> Yojson.Basic.t
 
+(** [from_json f] is the R tree read from a JSON file [f], containing the 
+    coordinates and the tags of the points stored in the JSON. *)
+val from_json : string -> string list t
+
 (*read and conversion operations*)
