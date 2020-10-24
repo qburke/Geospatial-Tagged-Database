@@ -296,7 +296,7 @@ let add p x tree =
   let entry = {
     parent = None;
     mbr = Rect.of_point p;
-    children = `Entry (Some x)
+    children = `Entry x
   }
   in add_aux entry tree
 
@@ -319,3 +319,16 @@ let rec json_of_t t = Yojson.Basic.(
   )
 
 let to_json tree = Yojson.Basic.(`Assoc [("rtree", json_of_t tree)])
+
+let choose_container p node =
+  List.filter (fun c -> Rect.is_in p c.mbr) (children node)
+
+let rec mem_aux p x = function
+  | node :: t -> begin
+      match node.children with
+      | `Node lst -> mem_aux p x (choose_container p node)
+      | `Entry e -> x = e || mem_aux p x t
+    end
+  | [] -> false
+
+let mem p x r = mem_aux p x [r] 
