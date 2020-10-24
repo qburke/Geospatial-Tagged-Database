@@ -7,6 +7,9 @@ type 'a t
 (** [empty ()] is the empty R Tree. *)
 val empty : 'a -> 'a t
 
+(** [new_tree p x] is a new R Tree with one element [x] at [p]. *)
+val new_tree : Point.t -> 'a -> 'a t
+
 (** [add x r] modifies [r] to include [x]. Requires [x] not in [r]. *)
 val add : Point.t -> 'a -> 'a t -> unit
 

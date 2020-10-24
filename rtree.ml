@@ -11,30 +11,54 @@ let max_entries = 8
 *)
 
 
-type ('a, 'b) leaf_or_node = 
-  | Leaf of (Point.t * 'b) list  
-  | Node of 'a list
+(* type ('a, 'b) leaf_or_node = 
+   | Leaf of (Point.t * 'b) list  
+   | Node of 'a list *)
 
 type 'a t = {
   parent: 'a t option;
   mutable mbr: Rect.t;
-  mutable children: [`Node of 'a t list | `Entry of 'a option]
+  mutable children: [`Node of 'a t list | `Entry of 'a]
 }
 
 
-let empty_leaf emp par = {
+(* let empty_leaf emp par = {
+   parent = Some par;
+   mbr = Rect.empty;
+   children = `Entry (Some emp);
+   } *)
+
+(* let empty emp = 
+   let root = {
+    parent = None;
+    mbr = Rect.empty;
+    children = `Node [];
+   } in root.children <- `Node ( (empty_leaf emp root) :: []);
+   root *)
+
+let empty_leaf par = {
   parent = Some par;
   mbr = Rect.empty;
-  children = `Entry (Some emp);
+  children = `Entry None;
 }
 
 let empty emp = 
+  {
+    parent = None;
+    mbr = Rect.empty;
+    children = `Node [];
+  }
+
+let new_tree p x = 
   let root = {
     parent = None;
     mbr = Rect.empty;
     children = `Node [];
-  } in root.children <- `Node ( (empty_leaf emp root) :: []);
-  root
+  } in root.children <- `Node( {
+      parent = Some root;
+      mbr = Rect.of_point p;
+      children = `Entry x
+    } :: [])
 
 let parent (n : 'a t) : 'a t =
   match n.parent with
@@ -149,7 +173,6 @@ insert (p, u)
     insert p v
  *)
 
-
 let compare_mbr (compare_x : bool) (x1: 'a t) (x2 : 'a t) : int = 
   let p1 = fst x1.mbr in 
   let p2 = fst x1.mbr in
@@ -170,28 +193,35 @@ let sort_subtree (lst: 'a t list) (sort_x: bool) : 'a t list =
 
 let ceil_int n  = n |> ceil |> int_of_float
 
-let perimeter_sum (n : 'a t list) : float = 
-  List.fold_left (fun acc x -> acc +. (Rect.perimeter x.mbr)) 0. n 
+(* let perimeter_sum (n : 'a t list) : float = 
+   List.fold_left (fun acc x -> acc +. (Rect.perimeter x.mbr)) 0. n  *)
 
 (* Perhaps would be easier to split arrays rather than nodes? *)
 (* [split n] is the result of splitting [n],  *) 
 let split (n : 'a t list) : ('a t list * 'a t list) =
   let m = float_of_int (List.length n) in
   let sorted_x = sort_subtree n true in
-  let sorted_y = sort_subtree n false in
+  (* let sorted_y = sort_subtree n false in *)
   let start_idx = ceil_int (0.25 *. float_of_int max_boxes) in
   let end_idx = ceil_int (m -. 0.25 *. float_of_int max_boxes) in
-  let min_perimeter_sum = ref 0 in
+  let min_perimeter_sum = ref 0. in
   let min_split = ref (n, n) in
+  (* TODO: iterate also for sorted_y list *)
   for i = start_idx to end_idx do
     (* 
       compare sets of the first i sets and (m -i) sets for both x-wise split
       and y-wise split from start_idx to end_idx and update the min_perimeter 
       and min_split accordingly.
       *)
-    let s, s' = split_at i n in ()
+    let s, s' = split_at i sorted_x in 
+    let mbr_s = s |> List.map (fun x -> x.mbr) |> Rect.mbr_of_list in 
+    let mbr_s' = s' |> List.map (fun x -> x.mbr) |> Rect.mbr_of_list in
+    let new_perimeter_sum = (Rect.perimeter mbr_s) +. (Rect.perimeter mbr_s') in
+    if new_perimeter_sum < !min_perimeter_sum then 
+      min_perimeter_sum := new_perimeter_sum; 
+    min_split := (s, s')
   done;
-  (n, n) 
+  !min_split 
 
 
 
