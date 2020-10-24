@@ -9,7 +9,6 @@ let max_entries = 8
   * access parent
   * mutable bounding box for modifications
 *)
-
 type 'a t = {
   parent: 'a t option;
   mutable mbr: Rect.t;
@@ -71,9 +70,6 @@ let compare_mbr_x (compare_x : bool) (x1: 'a t) (x2 : 'a t) : int =
   let c2 = if compare_x then fst p2 else snd p2 in
   Stdlib.compare c1 c2
 
-let compare_mbr (obj1: 'a t) (obj2: 'a t) : int =
-  Stdlib.compare (area obj1.mbr) (area obj2.mbr)
-
 let split_at (n : int) (lst : 'a list) : ('a list * 'a list) = 
   let rec helper n lst acc = 
     if n = 0 then (acc, lst) else
@@ -82,31 +78,21 @@ let split_at (n : int) (lst : 'a list) : ('a list * 'a list) =
       | h :: t -> helper (n - 1) t (h::acc) in
   helper n lst []
 
-let sort_subtree (lst: 'a t list) = 
-  List.sort compare_mbr lst
-
 let sort_subtree_x (lst: 'a t list) (sort_x: bool) : 'a t list = 
   List.sort (compare_mbr_x sort_x) lst
 
 let ceil_int n  = n |> ceil |> int_of_float
 
-(* Perhaps would be easier to split arrays rather than nodes? *)
 (* [split n] is the result of splitting [n],  *) 
 let split (n : 'a t list) : ('a t list * 'a t list) =
   let m = float_of_int (List.length n) in
   let sorted_lsts = [sort_subtree_x n true; sort_subtree_x n false] in
-  (* let sorted_y = sort_subtree n false in *)
   let start_idx = ceil_int (0.25 *. float_of_int max_boxes) in
   let end_idx = ceil_int (m -. 0.25 *. float_of_int max_boxes) in
   let min_perimeter_sum = ref max_float in
   let min_split = ref (n, n) in
   for j = 0 to 1 do
     for i = start_idx to end_idx do
-      (* 
-        compare sets of the first i sets and (m -i) sets for both x-wise split
-        and y-wise split from start_idx to end_idx and update the min_perimeter 
-        and min_split accordingly.
-        *)
       let s, s' = split_at i (List.nth sorted_lsts j) in 
       let mbr_s = s |> List.map (fun x -> x.mbr) |> Rect.mbr_of_list in 
       let mbr_s' = s' |> List.map (fun x -> x.mbr) |> Rect.mbr_of_list in
@@ -151,7 +137,7 @@ let rec handle_overflow (n : ('a t)) : unit =
     (* update children of n to be first result of split *)
     n.children <- `Node u;
     (* update bounding box of n *)
-    n.mbr <- n |> mbr_of_children |> Rect.mbr_of_list; (* FIXME *)
+    n.mbr <- n |> mbr_of_children |> Rect.mbr_of_list;
     (* create new node n' around second result of split *)
     let n' = {
       parent = Some n;
@@ -161,7 +147,7 @@ let rec handle_overflow (n : ('a t)) : unit =
     (* add new node to parent *)
     w.children <- `Node (n' :: children w);
     (* update bounding box of parent *)
-    w.mbr <- w |> mbr_of_children |> Rect.mbr_of_list; (* FIXME *)
+    w.mbr <- w |> mbr_of_children |> Rect.mbr_of_list;
     (* handle_overflow if necessary*)
     if w |> children |> List.length > max_boxes then
       handle_overflow w
