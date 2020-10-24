@@ -10,31 +10,11 @@ let max_entries = 8
   * mutable bounding box for modifications
 *)
 
-
-(* type ('a, 'b) leaf_or_node = 
-   | Leaf of (Point.t * 'b) list  
-   | Node of 'a list *)
-
 type 'a t = {
   parent: 'a t option;
   mutable mbr: Rect.t;
   mutable children: [`Node of 'a t list | `Entry of 'a]
 }
-
-
-(* let empty_leaf emp par = {
-   parent = Some par;
-   mbr = Rect.empty;
-   children = `Entry (Some emp);
-   } *)
-
-(* let empty emp = 
-   let root = {
-    parent = None;
-    mbr = Rect.empty;
-    children = `Node [];
-   } in root.children <- `Node ( (empty_leaf emp root) :: []);
-   root *)
 
 let empty_leaf par = {
   parent = Some par;
@@ -84,90 +64,6 @@ let node_append box n =
 let mbr_of_children (n : 'a t) : Rect.t list =
   List.map (fun c -> c.mbr) (children n)
 
-(* let leaf_append (Leaf leaf) (entry) = 
-   Leaf (entry :: leaf) *)
-
-(* let node_append (Node node) (box) =
-   Node (box :: node) *)
-
-(* let lon_append lon x =
-   match lon with
-   | Node _ -> node_append lon x
-   | Leaf _ -> leaf_append lon x *)
-
-(* 
-type 'a t =
-  | Node of (Rect.t * 'a t) option array
-  | Leaf of (Point.t * 'a) option array
-
-
-let empty_node () = Array.make max_boxes None
-let empty () = Node (empty_node ())
-
-let unwrap_option = function
-  | None -> failwith "No element to unwrap."
-  | Some a -> a *)
-
-(* * [size t] is the
-   let rec size = function
-   | Node boxes -> 0
-   | Leaf entries -> 0 *)
-
-(*
-let split_leaf u
-	m = the number of points in u
-  repeat following for y-dim
-    sort the points of u on x-dimension
-      for i = ciel 0.4B to m − ciel 0.4B
-      S1 = the set of the first i points in the list
-      S2 = the set of the other i points in the list
-      calculate the perimeter sum of MBR(S1) and MBR(S2); record it
-        if this is the best split so far
-	return the best split found
-
-let split_node u =
-	m = the number of points in u
-  repeat following for right boundaries on x-dim and w.r.t to y-dim
-    sort the rectangles in u by their left boundaries on the x-dimension
-    for i = ciel 0.4B to m − ciel 0.4B
-      S1 = the set of the first i rectangles in the list
-      S2 = the set of the other i rectangles in the list
-      calculate the perimeter sum of MBR(S1) and MBR(S2); record it
-        if this is the best split so far
-  return the best split found
-
-let split u = 
-	if u is a node then split_node u
-  else split_leaf u
-
-let handle_overflow u = 
-	let u, u' = split u
-  if u = root then
-  	create new root;
-    add u and u' as child nodes;
-  else
-  	let w = parent u
-    update MBR of u in w
-    add 'u as child of w
-    if w overflows then
-    	handle-overflow w
-
-let choose_subtree u p =
-	return child whose MBR requires minimum increase in perimeter to cover p
-  tie-break with area
-
-add
-  if length of u can accomodate p
-    p :: u
-  else 
-
-  if u overflows then
-  	handle_overflow u
-  else
-  	let v = choose_subtree u p
-    insert p v
- *)
-
 let compare_mbr_x (compare_x : bool) (x1: 'a t) (x2 : 'a t) : int = 
   let p1 = fst x1.mbr in 
   let p2 = fst x2.mbr in
@@ -189,21 +85,13 @@ let split_at (n : int) (lst : 'a list) : ('a list * 'a list) =
 let sort_subtree (lst: 'a t list) = 
   List.sort compare_mbr lst
 
-let sort_subtree_x (lst: 'a t list) (sort_x: bool) : 'a t list = 
-  List.sort (compare_mbr_x sort_x) lst
-
 let ceil_int n  = n |> ceil |> int_of_float
-
-(* let perimeter_sum (n : 'a t list) : float = 
-   List.fold_left (fun acc x -> acc +. (Rect.perimeter x.mbr)) 0. n  *)
-
 
 (* Perhaps would be easier to split arrays rather than nodes? *)
 (* [split n] is the result of splitting [n],  *) 
 let split (n : 'a t list) : ('a t list * 'a t list) =
   let m = float_of_int (List.length n) in
-  let sorted_by = [sort_subtree_x n true; sort_subtree_x n false] in
-  (* let sorted_y = sort_subtree n false in *)
+  let sorted_by = [sort_subtree n true; sort_subtree n false] in
   let start_idx = ceil_int (0.25 *. float_of_int max_boxes) in
   let end_idx = ceil_int (m -. 0.25 *. float_of_int max_boxes) in
   let min_perimeter_sum = ref max_float in
