@@ -9,7 +9,6 @@ let max_entries = 8
   * access parent
   * mutable bounding box for modifications
 *)
-
 type 'a t = {
   parent: 'a t option;
   mutable mbr: Rect.t;
@@ -87,11 +86,10 @@ let sort_subtree (lst: 'a t list) =
 
 let ceil_int n  = n |> ceil |> int_of_float
 
-(* Perhaps would be easier to split arrays rather than nodes? *)
 (* [split n] is the result of splitting [n],  *) 
 let split (n : 'a t list) : ('a t list * 'a t list) =
   let m = float_of_int (List.length n) in
-  let sorted_by = [sort_subtree n true; sort_subtree n false] in
+  let sorted_by = [sort_subtree n; sort_subtree n ] in
   let start_idx = ceil_int (0.25 *. float_of_int max_boxes) in
   let end_idx = ceil_int (m -. 0.25 *. float_of_int max_boxes) in
   let min_perimeter_sum = ref max_float in
@@ -148,7 +146,7 @@ let rec handle_overflow (n : ('a t)) : unit =
     (* update children of n to be first result of split *)
     n.children <- `Node u;
     (* update bounding box of n *)
-    n.mbr <- n |> mbr_of_children |> Rect.mbr_of_list; (* FIXME *)
+    n.mbr <- n |> mbr_of_children |> Rect.mbr_of_list;
     (* create new node n' around second result of split *)
     let n' = {
       parent = Some n;
@@ -158,7 +156,7 @@ let rec handle_overflow (n : ('a t)) : unit =
     (* add new node to parent *)
     w.children <- `Node (n' :: children w);
     (* update bounding box of parent *)
-    w.mbr <- w |> mbr_of_children |> Rect.mbr_of_list; (* FIXME *)
+    w.mbr <- w |> mbr_of_children |> Rect.mbr_of_list;
     (* handle_overflow if necessary*)
     if w |> children |> List.length > max_boxes then
       handle_overflow w
