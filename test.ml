@@ -174,6 +174,11 @@ let int_tree_2_entries = 10 |> ints_from_to 0 |> entries_of_int_range
 let int_tree_3 = new_tree (0., 0.) 0
 let () = List.iter (fun (p, x) -> add p x int_tree_3) int_tree_2_entries
 
+let int_tree_4 = new_tree (0., 0.) 0
+let () = List.iter
+    (fun (p, x) -> add p x int_tree_4)
+    (10000 |> ints_from_to 0 |> entries_of_int_range)
+
 (** [add_test name entries tree dir file expected_output] constructs an OUnit
     test named [name] that asserts that adding each element in [entries] to
     [tree] was successful. *)
@@ -270,6 +275,7 @@ let rtree_tests = List.flatten [
     [
       out_json_test "int_tree_3 out to int_tree_3.json" "int_tree_3.json" 
         int_tree_3;
+      out_json_test "1000 elements" "thousand.json" int_tree_4;
     ]
   ]
 
