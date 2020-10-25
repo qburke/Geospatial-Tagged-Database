@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "title": "R Tree Schema",
+  "description": "The schema for R Trees.",
+  "definitions": {
+    "point": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ]
+    },
+    "box": {
+      "type": "object",
+      "properties": {
+        "bottom-left": {
+          "$ref": "#/definitions/point"
+        },
+        "upper-right": {
+          "$ref": "#/definitions/point"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/box"
+              },
+              {
+                "$ref": "#/definitions/point"
+              }
+            ]
+          },
+          "default": []
+        }
+      },
+      "required": [
+        "bottom-left",
+        "upper-right",
+        "children"
+      ]
+    }
+  },
+  "type": "object",
+  "properties": {
+    "rtree": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/box"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/point"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}
