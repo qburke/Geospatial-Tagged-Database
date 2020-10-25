@@ -20,7 +20,7 @@ type 'a reverse_index
 type 'a database
 
 (** [create data tags] returns an ['a element] *)
-val create_element : 'a -> string list -> 'a element
+val create_element : 'a -> string list -> Point.t -> 'a element
 
 val data_of_element : 'a element -> 'a
 

@@ -1,6 +1,7 @@
 type 'a element = {
   data : 'a;
   tags : string list;
+  location : Point.t;
 }
 
 type 'a spatial_data = ('a element, int) Hashtbl.t
@@ -11,12 +12,12 @@ type 'a reverse_index = (string, 'a tag_collection) Hashtbl.t
 
 type 'a database = {
   elements : ('a, int) Hashtbl.t;
-  rTree : 'a spatial_data;
+  rTree : 'a element Rtree.t;
   tag_index : 'a reverse_index;
 }
 
-let create_element data tags =
-  {data = data; tags = tags}
+let create_element data tags location =
+  {data = data; tags = tags; location = location}
 
 let data_of_element e =
   match e with
@@ -26,15 +27,13 @@ let data_of_element e =
    deleting init_val causes the hash-table to take the type of init_val *)
 let create_db  init_val : 'a database =
   let new_elements = Hashtbl.create 1000 in
-  let new_rTree = Hashtbl.create 1000 in
+  let new_rTree = Rtree.new_tree init_val.location init_val in
   let new_tag_index = Hashtbl.create 1000 in
   let new_tag_collection = Hashtbl.create 1000 in
   Hashtbl.add new_elements init_val.data 0;
-  Hashtbl.add new_rTree init_val 0;
   Hashtbl.add new_tag_collection init_val 0;
   Hashtbl.add new_tag_index "nil" new_tag_collection;
   Hashtbl.remove new_elements init_val.data;
-  Hashtbl.remove new_rTree init_val;
   Hashtbl.remove new_tag_index "nil";
   {elements = new_elements; rTree = new_rTree; tag_index = new_tag_index}
 
@@ -59,7 +58,7 @@ let add db e =
         add_to_index data xs in
     e.tags |> add_to_index e;
     Hashtbl.replace  db.elements e.data 0;
-    Hashtbl.replace db.rTree e 0
+    Rtree.add e.location e db.rTree
 
 let tag_search db objects tags =
   let ri_lookup tag elem =
