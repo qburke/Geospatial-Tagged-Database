@@ -28,15 +28,6 @@ let rect_printer = function
     "((" ^ string_of_float a ^ ", " ^ string_of_float b ^ "), (" 
     ^ string_of_float c ^ ", " ^ string_of_float d ^ "))"
 
-(*let enlargement_pt_test 
-    (name : string) 
-    (pt : Point.t) 
-    (rect : Rect.t)
-    (expected_output : Rect.t * float) : test = 
-  name >:: (fun _ -> 
-      assert_equal expected_output (enlargement_pt pt rect) 
-        ~printer:tuple_printer)*)
-
 let enlargement_rect_test 
     (name : string) 
     (rect : Rect.t) 
@@ -54,16 +45,15 @@ let mbr_of_list_test
       assert_equal expected_output (mbr_of_list lst) ~printer:rect_printer)
 
 let points_1 = List.map
-    (fun i -> Rect.of_point (float_of_int i, float_of_int i)) (ints_from_to 0 10)
+    (fun i -> Rect.of_point (float_of_int i, float_of_int i)) 
+    (ints_from_to 0 10)
 
 let rect_tests = [
-  (*enlargement_pt_test "empty" origin_pt empty_rect (empty_rect, 0.);
-    enlargement_pt_test "origin pt" origin_pt rect1 (((0., 0.), (2., 3.)), 4.);
-    enlargement_pt_test "pt1 rect1" pt1 rect1 (rect1, 0.);
-    enlargement_pt_test "pt3 rect1" pt3 rect1 (((1., 2.), (2., 8.)), 5.);*)
   enlargement_rect_test "rect1 rect2" rect1 rect2 ((1., 2.), (2., 8.));
-  enlargement_rect_test "rect1 rect2" Rect.empty ((3., 3.), (3., 3.)) ((0., 0.), (3., 3.));
-  mbr_of_list_test "MBR of points (0,0) to (9,9) is (0,0), (9,9)" points_1 ((0., 0.), (9., 9.))
+  enlargement_rect_test "rect1 rect2" Rect.empty ((3., 3.), (3., 3.)) 
+    ((0., 0.), (3., 3.));
+  mbr_of_list_test "MBR of points (0,0) to (9,9) is (0,0), (9,9)" points_1 
+    ((0., 0.), (9., 9.))
 ]
 
 open Rtree
@@ -96,6 +86,29 @@ let add_test
     (fun (p, x) ->
        name >:: (fun _ ->
            assert_equal () (add p x tree))
+    )
+    entries
+
+let remove_test 
+    (name : string)
+    (entries : (Point.t * 'a) list)
+    (tree : 'a t) : test list =
+  List.map
+    (fun (p, x) ->
+       name >:: (fun _ ->
+           assert_equal () (remove p x tree))
+    )
+    entries
+
+let find_test 
+    (name : string)
+    (entries : (Point.t * 'a) list)
+    (output : bool * 'a Rtree.t)
+    (tree : 'a t) : test list =
+  List.map
+    (fun (p, x) ->
+       name >:: (fun _ ->
+           assert_equal output (find p x tree))
     )
     entries
 
@@ -135,10 +148,16 @@ let rtree_tests = List.flatten [
       mem_test "5 not at (1., 2.) in int_tree_1" (1., 2.) 5 int_tree_1 false;
       mem_test "64 not at (1., 2.) in int_tree_1" (1., 2.) 64 int_tree_1 false;
     ];
-    add_test "Add 10 records to int_tree_2" int_tree_2_entries int_tree_2;
-    mem_list_test "Check 10 records are in int_tree_2" int_tree_2_entries int_tree_2;
     [
-      out_json_test "int_tree_2 out to int_tree_2.json" "int_tree_2.json" int_tree_2;
+      (*remove_test "3 at (1., 2.) in int_tree_1" (1., 2.) 3 int_tree_1;*)
+
+    ];
+    add_test "Add 10 records to int_tree_2" int_tree_2_entries int_tree_2;
+    mem_list_test "Check 10 records are in int_tree_2" int_tree_2_entries 
+      int_tree_2;
+    [
+      out_json_test "int_tree_2 out to int_tree_2.json" "int_tree_2.json" 
+        int_tree_2;
     ]
   ]
 
