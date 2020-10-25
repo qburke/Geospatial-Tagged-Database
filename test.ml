@@ -171,18 +171,23 @@ let entries_of_int_range lst =
 let int_tree_2 = new_tree (0., 0.) 0
 let int_tree_2_entries = 10 |> ints_from_to 0 |> entries_of_int_range
 
+let int_tree_3 = new_tree (0., 0.) 0
+let () = List.iter (fun (p, x) -> add p x int_tree_3) int_tree_2_entries
 
-(** [add_test name entries tree expected_output] constructs an OUnit
+(** [add_test name entries tree dir file expected_output] constructs an OUnit
     test named [name] that asserts that adding each element in [entries] to
-    [tree] returns [unit]. *)
+    [tree] was successful. *)
 let add_test
     (name : string)
     (entries : (Point.t * 'a) list)
     (tree : 'a t) : test list =
-  List.map
-    (fun (p, x) ->
-       name >:: (fun _ ->
-           assert_equal () (add p x tree))
+  List.mapi
+    (fun i (p, x) ->
+       name >::
+       (fun _ -> begin
+            add p x tree;
+            assert_equal true (mem p x tree) ~printer:string_of_bool
+          end)
     )
     entries
 
@@ -260,11 +265,11 @@ let rtree_tests = List.flatten [
 
     ];
     add_test "Add 10 records to int_tree_2" int_tree_2_entries int_tree_2;
-    mem_list_test "Check 10 records are in int_tree_2" int_tree_2_entries 
-      int_tree_2;
+    mem_list_test "Check 10 records are in int_tree_3" int_tree_2_entries 
+      int_tree_3;
     [
-      out_json_test "int_tree_2 out to int_tree_2.json" "int_tree_2.json" 
-        int_tree_2;
+      out_json_test "int_tree_3 out to int_tree_3.json" "int_tree_3.json" 
+        int_tree_3;
     ]
   ]
 
