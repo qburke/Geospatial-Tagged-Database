@@ -17,7 +17,7 @@ type command =
   | Load of object_phrase
   | Query of object_phrase
   | Add
-  | Delete
+  | Delete of object_phrase
   | Write of object_phrase
   | Quit
 
