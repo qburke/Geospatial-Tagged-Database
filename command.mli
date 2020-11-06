@@ -12,7 +12,7 @@ type search_parameter = string list
 (** The type [command]  represents an interface command that is 
     decomposed into a verb and possibly an object phrase *)
 type command =
-  | Help
+  | Help of object_phrase
   | Initialize
   | Load of object_phrase
   | Query of object_phrase

@@ -6,6 +6,7 @@ let open_interface =
     print_string "> ";
     try match read_line () |> parse  with
       | Quit -> print_endline "Goodbye"; exit 0;
+      | Help cmd -> help cmd |> print_endline; loop st
       | _ -> loop st
     with
     | Empty | Malformed ->
@@ -13,5 +14,8 @@ let open_interface =
       match read_line () with _ -> print_string "";
         loop st;
   in
-  init_state |> loop;
+  init_state |> loop
 
+  let main () =
+    ANSITerminal.();
+    open_interface

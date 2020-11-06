@@ -1,3 +1,5 @@
+open Command
+
 (** 
    Representation of interactive database state.
 
@@ -14,3 +16,7 @@ type 'a t
 val init_state : 'a t
 
 (** TODO: Add rest of functionality found in command.mli *)
+
+(** [help param] returns a string corresponding to a help phrase
+      for the given object phrase *)
+val help : object_phrase -> string
