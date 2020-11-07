@@ -6,8 +6,21 @@ type 'a t =
 
 let init_state = Empty
 
+exception DatabaseAlreadyExists
+  
+exception NoDatabaseIntialized
+
+let initialize st name  =
+  if st != Empty then raise DatabaseAlreadyExists else
+  Database (create_db name (create_element "" [""] (0.,0.)))
+
+let add st data tags location =
+  match st with
+  | Database db -> create_element data tags location |> Db.add db
+  | Empty -> raise NoDatabaseIntialized
+
 let help param =
-  let initialize = "placeholder" in
+  let initialize = "[initialize name] creates a new database with the given name\n" in
   let load = "placeholder" in
   let query = "placeholder" in
   let add = "placeholder" in

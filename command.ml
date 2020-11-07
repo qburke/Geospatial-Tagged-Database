@@ -4,7 +4,7 @@ type search_parameter = string list
 
 type command =
   | Help of object_phrase
-  | Initialize
+  | Initialize of object_phrase
   | Load of object_phrase
   | Query of object_phrase
   | Add
@@ -21,7 +21,7 @@ let parse str =
     let parse_cmd = function
       | [] | [""] -> raise Empty
       | "help"::xs -> Help xs
-      | "initialize"::[] -> Initialize
+      | "initialize"::name::[] -> Initialize [name]
       | "initialize"::_ -> raise Malformed
       | "load"::[] -> raise Malformed
       | "load"::xs -> Load xs

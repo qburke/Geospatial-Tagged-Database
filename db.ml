@@ -11,6 +11,7 @@ type 'a tag_collection = ('a element, int) Hashtbl.t
 type 'a reverse_index = (string, 'a tag_collection) Hashtbl.t
 
 type 'a database = {
+  name : string;
   elements : ('a, int) Hashtbl.t;
   rTree : 'a element Rtree.t;
   tag_index : 'a reverse_index;
@@ -25,7 +26,7 @@ let data_of_element e =
 
 (* Hash-tables have no specific type by default when created. Adding in and 
    deleting init_val causes the hash-table to take the type of init_val *)
-let create_db  init_val : 'a database =
+let create_db name init_val : 'a database =
   let new_elements = Hashtbl.create 1000 in
   let new_rTree = Rtree.new_tree init_val.location init_val in
   let new_tag_index = Hashtbl.create 1000 in
@@ -35,7 +36,8 @@ let create_db  init_val : 'a database =
   Hashtbl.add new_tag_index "nil" new_tag_collection;
   Hashtbl.remove new_elements init_val.data;
   Hashtbl.remove new_tag_index "nil";
-  {elements = new_elements; rTree = new_rTree; tag_index = new_tag_index}
+  {name = name; elements = new_elements;
+   rTree = new_rTree; tag_index = new_tag_index}
 
 let list_of_reverse_index db =
   Hashtbl.fold (fun k _ acc -> k::acc) db.tag_index [] |>
@@ -68,4 +70,3 @@ let tag_search db objects tags =
     List.fold_left
       (fun acc tag-> if ri_lookup tag elem then acc else false) true tags in
   List.filter filter_func objects
-

@@ -13,7 +13,7 @@ type search_parameter = string list
     decomposed into a verb and possibly an object phrase *)
 type command =
   | Help of object_phrase
-  | Initialize
+  | Initialize of object_phrase
   | Load of object_phrase
   | Query of object_phrase
   | Add

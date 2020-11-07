@@ -24,7 +24,7 @@ val create_element : 'a -> string list -> Point.t -> 'a element
 
 val data_of_element : 'a element -> 'a
 
-val create_db : 'a element -> 'a database 
+val create_db : string -> 'a element -> 'a database 
 
 val list_of_reverse_index : 'a database -> string list
 
