@@ -23,12 +23,18 @@ type 'a database
 val create_element : 'a -> string list -> Point.t -> 'a element
 
 val data_of_element : 'a element -> 'a
+  
+val tags_of_element : 'a element -> string list
+  
+val location_of_element : 'a element -> Point.t
 
 val create_db : string -> 'a element -> 'a database 
 
 val list_of_reverse_index : 'a database -> string list
 
 val list_of_tag_collection : 'a database -> string -> 'a element list
+
+val list_of_elements : 'a database -> 'a element list
 (** [add db e]  adds the data of type ['a] of an item of type ['a element] to
     the [reverse_index] of [db] for each tag_collection corresponding to the tags of
     [e]. If there is a tag not present in [reverse_index] then a new tag collection is

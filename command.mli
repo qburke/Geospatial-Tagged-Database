@@ -15,7 +15,8 @@ type command =
   | Help of object_phrase
   | Initialize of object_phrase
   | Load of object_phrase
-  | Query of object_phrase
+  | Query 
+  | List
   | Add
   | Delete of object_phrase
   | Write of object_phrase

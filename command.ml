@@ -6,7 +6,8 @@ type command =
   | Help of object_phrase
   | Initialize of object_phrase
   | Load of object_phrase
-  | Query of object_phrase
+  | Query 
+  | List
   | Add
   | Delete of object_phrase
   | Write of object_phrase
@@ -25,9 +26,12 @@ let parse str =
       | "initialize"::_ -> raise Malformed
       | "load"::[] -> raise Malformed
       | "load"::xs -> Load xs
-      | "query"::xs -> Query xs
+      | "query"::[] -> Query
+      | "query"::_ -> raise Malformed
       | "add"::[] -> Add
       | "add"::_ -> raise Malformed
+      | "list"::[] -> List
+      | "list"::_ -> raise Malformed
       | "delete"::[] -> raise Malformed
       | "delete"::xs -> Delete xs
       | "write"::xs -> Write xs
