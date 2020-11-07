@@ -10,7 +10,7 @@ let max_entries = 8
   * mutable bounding box for modifications
 *)
 type 'a t = {
-  parent: 'a t option;
+  mutable parent: 'a t option;
   mutable mbr: Rect.t;
   mutable children: [`Node of 'a t list | `Entry of 'a]
 }
@@ -109,6 +109,16 @@ let split (n : 'a t list) : ('a t list * 'a t list) =
   done;
   !min_split 
 
+let node_with_children n c_lst =
+  let node = {
+          parent = Some n;
+          mbr = Rect.empty;
+          children = `Node c_lst;
+  } in
+  List.iter (fun c -> c.parent <- Some node) c_lst;
+  node.children <- `Node c_lst;
+  node
+
 (* [handle_overflow n] splits [n] into two bounding boxes n and n', updating the
    children of n and its MBR, and adding n' to their shared parent.*)
 let rec handle_overflow (n : ('a t)) : unit =
@@ -116,19 +126,12 @@ let rec handle_overflow (n : ('a t)) : unit =
   let u, u' = n |> children |> split in
   if n.parent = None then
     (* update children of n to be first result of split *)
-    let n' = {
-      parent = Some n;
-      mbr = Rect.empty;
-      children = `Node u
-    } in
+    let n' = node_with_children n u in
     (* create new node n' around second result of split *)
-    let n'' = {
-      parent = Some n;
-      mbr = Rect.empty;
-      children = `Node u';
-    } in
+    let n'' = node_with_children n u' in
+    (* update bounding box of n'' *)
     n''.mbr <- n'' |> mbr_of_children |> Rect.mbr_of_list;
-    (* update bounding box of n *)
+    (* update bounding box of n' *)
     n'.mbr <- n' |> mbr_of_children |> Rect.mbr_of_list; (* TODO factor out *)
     (* add new node to parent *)
     n.children <- `Node (n' :: n'' :: []);
@@ -141,11 +144,9 @@ let rec handle_overflow (n : ('a t)) : unit =
     (* update bounding box of n *)
     n.mbr <- n |> mbr_of_children |> Rect.mbr_of_list;
     (* create new node n' around second result of split *)
-    let n' = {
-      parent = Some n;
-      mbr = Rect.empty;
-      children = `Node u';
-    } in
+    let n' = node_with_children w u' in
+    (* update bounding box of n' *)
+    n'.mbr <- n' |> mbr_of_children |> Rect.mbr_of_list;
     (* add new node to parent *)
     w.children <- `Node (n' :: children w);
     (* update bounding box of parent *)
@@ -189,33 +190,40 @@ let add p x tree =
   }
   in add_aux entry tree
 
-(** [find_aux entry node] begins at root [node] and searches for Entry that 
-    matches [entry] *)
-let rec find_aux entry node =
-  match node.children with
-  | `Entry _ -> begin
-      if (entry.mbr = node.mbr && entry.children = node.children) 
-      then true, node
-      else failwith "Entry [entry] cannot be found."
-    end
-  | `Node lst -> begin
-      find_aux entry (choose_subtree entry node)
-    end
 
-let find p x tree = 
+let choose_container p node =
+  List.filter (fun c -> Rect.is_in p c.mbr) (children node)
+
+(** [find_aux entry node] begins at root [node] and searches for Entry that
+    matches [entry] *)
+let rec find_aux p x = function
+  | node :: t -> begin
+      match node.children with
+      | `Node lst -> find_aux p x (choose_container p node)
+      | `Entry e -> if (node.mbr = (Rect.of_point p) && x = e) then
+                       true, node
+                    else find_aux p x t
+    end
+  | [] -> failwith "Can't find the node"
+
+
+let find p x tree =
   (* entry is node to be find *)
   let entry = {
     parent = None;
     mbr = Rect.of_point p;
     children = `Entry x
   }
-  in try find_aux entry tree with
+  in try find_aux p x [tree] with
   | exc -> false, entry
+
 
 let rec propagate_mbr node = 
   let parent_node = node.parent in
-  ignore (node.mbr <- Rect.mbr_of_list (mbr_of_children node));
-  match parent_node with 
+  (** TODO, reevaluate when supporting collapsing *)
+  if List.length (mbr_of_children node) = 0 then ()
+  else node.mbr <- Rect.mbr_of_list (mbr_of_children node);
+  match parent_node with
   | None -> ()
   | Some p -> propagate_mbr p
 
@@ -224,8 +232,8 @@ let remove p x tree =
   let found, node = find p x tree in 
   match found with 
   | true -> begin
-      let parent_node = parent node in 
-      ignore (node_remove parent_node node);
+      let parent_node = parent node in
+      parent_node.children <- `Node (node_remove parent_node node);
       propagate_mbr parent_node;
     end
   | false -> ()
@@ -247,9 +255,6 @@ let rec json_of_t t = Yojson.Basic.(
   )
 
 let to_json tree = Yojson.Basic.(`Assoc [("rtree", json_of_t tree)])
-
-let choose_container p node =
-  List.filter (fun c -> Rect.is_in p c.mbr) (children node)
 
 let rec mem_aux p x = function
   | node :: t -> begin
