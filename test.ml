@@ -287,3 +287,34 @@ let suite =
   ]
 
 let _ = run_test_tt_main suite
+
+let assert_find p x expected_result tree =
+  let found, entry = find p x tree in
+  assert(found = expected_result)
+
+(**  Test Pass, tree without split
+     let () = add (2.5, 2.5) 25 int_tree_1
+     let () = assert_find (2.5, 2.5) 25 true int_tree_1
+     let () = add (3.5, 3.5) 35 int_tree_1
+     let () = assert_find (3.5, 3.5) 35 true int_tree_1
+     let () = remove (3.5, 3.5) 35 int_tree_1
+     let () = assert_find (3.5, 3.5) 35 false int_tree_1
+     let () = remove (2.5, 2.5) 25 int_tree_1
+     let () = assert_find (2.5, 2.5) 25 false int_tree_1
+*)
+
+let number_entries = 101
+let int_test_tree_entries = number_entries |> ints_from_to 1 |> entries_of_int_range
+let int_test_tree = new_tree (0., 0.) 0
+let () = List.iter (fun (p, x) -> add p x int_test_tree) int_test_tree_entries
+
+let () = remove (9.,9.) 9 int_test_tree
+let () = assert_find (9.,9.) 9 false int_test_tree
+let () = remove (8.,8.) 8 int_test_tree
+let () = assert_find (8.,8.) 8 false int_test_tree
+let () = remove (7.,7.) 7 int_test_tree
+let () = assert_find (7.,7.) 7 false int_test_tree
+let () = remove (30.,30.) 30 int_test_tree
+let () = assert_find (30.,30.) 30 false int_test_tree
+let () = remove (100.,100.) 100 int_test_tree
+let () = assert_find (100.,100.) 100 false int_test_tree
