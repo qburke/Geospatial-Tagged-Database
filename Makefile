@@ -1,4 +1,4 @@
-MODULES=rtree point rect 
+MODULES=rtree point rect db command state
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
@@ -14,6 +14,9 @@ build:
 
 test:
 	$(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST)
+
+interface:
+	$(OCAMLBUILD) $(MAIN) && ./$(MAIN)
 	
 zip:
 	zip ms1.zip *.ml* *.json _tags Makefile README.md

@@ -46,7 +46,7 @@ let enlargement_rect_test
 let init_obj = create_element "nil" ["nil"] Point.origin
 
 let make_db (elems : 'a element list) =
-  let db = create_db init_obj in
+  let db = create_db "test db" init_obj in
   ignore(List.map
            (fun elem -> add db elem) elems);
   db
