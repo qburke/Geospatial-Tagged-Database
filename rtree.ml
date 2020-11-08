@@ -30,7 +30,7 @@ let empty emp = {
 let new_tree p x = 
   let root = {
     parent = None;
-    mbr = Rect.empty;
+    mbr = Rect.of_point p;
     children = `Node [];
   } in root.children <- `Node( {
       parent = Some root;
@@ -111,9 +111,9 @@ let split (n : 'a t list) : ('a t list * 'a t list) =
 
 let node_with_children n c_lst =
   let node = {
-          parent = Some n;
-          mbr = Rect.empty;
-          children = `Node c_lst;
+    parent = Some n;
+    mbr = Rect.empty;
+    children = `Node c_lst;
   } in
   List.iter (fun c -> c.parent <- Some node) c_lst;
   node.children <- `Node c_lst;
@@ -201,8 +201,8 @@ let rec find_aux p x = function
       match node.children with
       | `Node lst -> find_aux p x (choose_container p node)
       | `Entry e -> if (node.mbr = (Rect.of_point p) && x = e) then
-                       true, node
-                    else find_aux p x t
+          true, node
+        else find_aux p x t
     end
   | [] -> failwith "Can't find the node"
 
@@ -294,9 +294,9 @@ let from_json f  =
   | [] -> failwith "No data in target JSON"
   | x::[] -> new_tree (fst x) (snd x)
   | x::xs -> begin 
-    let res = new_tree (fst x) (snd x) in 
-    List.iter (fun x -> add (fst x) (snd x) res) xs;
-    res
+      let res = new_tree (fst x) (snd x) in 
+      List.iter (fun x -> add (fst x) (snd x) res) xs;
+      res
     end
 
 
