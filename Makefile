@@ -19,18 +19,18 @@ interface:
 	$(OCAMLBUILD) $(MAIN) && ./$(MAIN)
 	
 zip:
-	zip ms1.zip *.ml* *.json _tags Makefile README.md
+	zip ms2.zip *.ml* *.json _tags Makefile README.md
 
 docs: docs-public docs-private
 	
 docs-public: build
 	mkdir -p doc.public
-	ocamlfind ocamldoc -I _build -package yojson,ANSITerminal \
+	ocamlfind ocamldoc -I _build -package yojson,ANSITerminal,mtime,logs \
 		-html -stars -d doc.public $(MLIS)
 
 docs-private: build
 	mkdir -p doc.private
-	ocamlfind ocamldoc -I _build -package yojson,ANSITerminal \
+	ocamlfind ocamldoc -I _build -package yojson,ANSITerminal,mtime,logs \
 		-html -stars -d doc.private \
 		-inv-merge-ml-mli -m A $(MLIS) $(MLS)
 

@@ -1,6 +1,8 @@
 #require "ounit2";;
 #require "yojson";;
 #require "ANSITerminal";;
+#require "logs";;
+#require "mtime";;
 #directory "_build";;
 #load "point.cmo";;
 #load "rect.cmo";;
