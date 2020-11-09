@@ -1,1 +1,1 @@
-true: package(ounit2),package(ANSITerminal),package(yojson),package(mtime),package(logs)
+true: package(ounit2),package(ANSITerminal),package(yojson),package(dolog)

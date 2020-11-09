@@ -190,7 +190,6 @@ let add p x tree =
   }
   in add_aux entry tree
 
-
 let choose_container p node =
   List.filter (fun c -> Rect.is_in p c.mbr) (children node)
 
