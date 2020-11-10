@@ -279,11 +279,23 @@ let rtree_tests = List.flatten [
     ]
   ]
 
+let json = Yojson.Basic.from_file "test_entry.json"
+let ithaca_entry = Entry.from_json json
+
+let entry_tests = [
+  "id is Ithaca" >:: (fun _ -> assert_equal "Ithaca" (Entry.id ithaca_entry));
+  "mbr is Ithaca" >:: (fun _ -> assert_equal ((42.43, -76.53), (42.46, -76.48))
+                          (Entry.mbr ithaca_entry));
+  "tags have Cornell" >:: (fun _ -> assert_equal true
+                              (ithaca_entry |> Entry.tags |> List.mem "Cornell"));
+]
+
 let suite =
   "test suite for final_project"  >::: List.flatten [
     rect_tests;
     rtree_tests;
     db_tests;
+    entry_tests;
   ]
 
 let _ = run_test_tt_main suite

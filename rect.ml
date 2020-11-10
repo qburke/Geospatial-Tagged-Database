@@ -51,3 +51,9 @@ let enlarge_rect_area r1 r2 =
 let enlarge_rect_peri r1 r2 = 
   let new_rect = enlargement_rect r1 r2
   in new_rect, perimeter new_rect -. perimeter r1
+
+let to_json r =
+  `Assoc [
+    ("ll", r |> ll |> Point.to_json);
+    ("ur", r |> ur |> Point.to_json);
+  ]

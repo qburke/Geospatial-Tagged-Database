@@ -35,3 +35,6 @@ val enlargement_rect : t -> t -> t
 
 (** [mbr_of_list lst] is the MBR of the the rectangles in [lst].*)
 val mbr_of_list : t list -> t
+
+(** [to_json r] is the JSON representation of [r] *)
+val to_json : t -> Yojson.Basic.t
