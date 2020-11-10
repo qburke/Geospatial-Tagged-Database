@@ -1,5 +1,6 @@
 exception InvalidInput
-  
+module Log = Dolog.Log
+
 let split_str str =
       str |> String.trim |> String.split_on_char ' '|>
       List.filter (fun x -> x = "" |> not) 
@@ -46,41 +47,56 @@ let print_elems () es =
       aux xs; in
   aux es
 
+let time (u:unit) (m:string) : unit = 
+  let s = Unix.gettimeofday () in
+  u;
+  let e = Unix.gettimeofday () in
+  let elapsed = (e -. s)*.(10.**6.) in
+  Log.info "%s in %.2f us" m elapsed
+
 (** [open_interface] starts the cli *)
 let open_interface =
+  Log.set_log_level Log.INFO;
+  Log.color_on ();
+  Log.set_output stdout;
   let open State in
   let open Command in          
   let rec loop st =
     print_string "> ";
     try
       try match read_line () |> parse  with
-        | Initialize [name] -> initialize st name |> loop;
+        | Initialize [name] -> 
+          let init = initialize st name in 
+          Log.info "Initialized DB: %s" name;
+          loop init 
         | Add ->
           let (name,tags,location) = parse_add () st in
-          add st name tags location;
+          time (add st name tags location) ("Added item "^name);
           loop st
         | Query ->
-          parse_query () st |> query_elems st |> print_elems (); loop st
+          let queries = parse_query () st in
+          time (queries |> query_elems st |> print_elems ()) ("Query complete in"); 
+          loop st
         | List -> get_elems st |> print_elems (); loop st
         | Quit -> print_endline "Goodbye"; exit 0;
         | Help cmd -> help cmd |> print_endline; loop st
         | _ -> loop st
       with
       | Empty | Malformed ->
-        print_endline "Invalid command\nPress enter to continue...";
+        Log.error "Invalid command\nPress enter to continue...";
         match read_line () with _ -> print_string "";
           loop st;
     with
     | DatabaseAlreadyExists ->
-      (print_endline "Cannot initialize multiple databases\nPress enter to continue...";
+      (Log.error "Cannot initialize multiple databases\nPress enter to continue...";
       match read_line () with _ -> print_string "";
         loop st;)
     | NoDatabaseInitialized ->
-      (print_endline "No database selected\nPress enter to continue...";
+      (Log.error "No database selected\nPress enter to continue...";
        match read_line () with _ -> print_string "";
          loop st;)
     | InvalidInput ->
-      print_endline "Invalid Input\nPress enter to continue...";
+      Log.error "Invalid Input\nPress enter to continue...";
       loop st;                                                     
   in
   init_state |> loop
