@@ -14,6 +14,8 @@ type 'a t
 exception DatabaseAlreadyExists
   
 exception NoDatabaseInitialized
+
+exception DataNotFound
   
 (** [init_state] is the initial state of the interface.
     In that state, no database has been loaded *)
@@ -22,7 +24,11 @@ val init_state : 'a t
 (** TODO: Add rest of functionality found in command.mli *)
 val add : 'a t -> 'a -> string list -> Point.t -> unit
 
+val delete_elem : 'a t -> 'a -> unit
+
 val get_elems : 'a t -> ('a * Point.t * string list) list
+
+val get_tags : 'a t -> string list
 
 (** [help param] returns a string corresponding to a help phrase
       for the given object phrase *)
