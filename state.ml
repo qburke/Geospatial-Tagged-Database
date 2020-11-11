@@ -32,6 +32,15 @@ let add st data tags location =
   | Database db -> create_element data tags location |> Db.add db
   | Empty -> raise NoDatabaseInitialized
 
+let delete_elem st n =
+  match st with
+  | Empty -> raise NoDatabaseInitialized
+  | Database db ->
+    let e =
+      try element_of_data db n with
+      | Not_found -> raise DataNotFound in
+    remove db e
+
 let get_elems st =
   match st with
   | Database db ->
@@ -44,17 +53,6 @@ let get_tags st =
   | Empty -> raise NoDatabaseInitialized
   | Database db ->
     list_of_reverse_index db
-
-let delete_elem st n =
-  match st with
-  | Empty -> raise NoDatabaseInitialized
-  | Database db ->
-    let e =
-      try element_of_data db n with
-      | Not_found -> raise DataNotFound in
-    remove db e
-         
-
 
 let help param =
   let initialize = "[initialize] creates a new database\n" in
