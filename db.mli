@@ -22,6 +22,8 @@ type 'a database
 (** [create data tags] returns an ['a element] *)
 val create_element : 'a -> string list -> Point.t -> 'a element
 
+val element_of_data : 'a database -> 'a -> 'a element
+
 val data_of_element : 'a element -> 'a
   
 val tags_of_element : 'a element -> string list
@@ -40,6 +42,9 @@ val list_of_elements : 'a database -> 'a element list
     [e]. If there is a tag not present in [reverse_index] then a new tag collection is
     created and added to [reverse_index] with the new tag as the key. *)
 val add : 'a database -> 'a element -> unit
+
+(** [remove db e] removes tye data of type ['a element] from the database *)
+val remove : 'a database -> 'a element -> unit
 
 (** [tag_search db objects tags] takes a collection of objects of type ['a element list] 
     and returns a list of elements which match all of the tags in the [string list] *)

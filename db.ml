@@ -20,6 +20,9 @@ type 'a database = {
 let create_element data tags location =
   {data = data; tags = tags; location = location}
 
+let element_of_data d n =
+  Hashtbl.find d.elements n
+
 let data_of_element e =
   match e with
   | {data; _} -> data
@@ -72,6 +75,17 @@ let add db e =
     e.tags |> add_to_index e;
     Hashtbl.replace  db.elements e.data e;
     Rtree.add e.location e db.rTree
+
+let remove db e : unit =
+  let f s =
+    Hashtbl.remove (Hashtbl.find db.tag_index s) e;
+    if Hashtbl.length (Hashtbl.find db.tag_index s) = 0 then
+      Hashtbl.remove db.tag_index s; in
+  if Hashtbl.mem db.elements e.data |> not then failwith "Not in database" else
+    (List.map f e.tags |> ignore;
+     Hashtbl.remove db.elements e.data;
+      Rtree.remove e.location e db.rTree;)
+  
 
 let tag_search db objects tags =
   let ri_lookup tag elem =

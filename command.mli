@@ -13,12 +13,13 @@ type search_parameter = string list
     decomposed into a verb and possibly an object phrase *)
 type command =
   | Help of object_phrase
-  | Initialize of object_phrase
+  | Initialize
   | Load of object_phrase
   | Query 
   | List
+  | Tags
   | Add
-  | Delete of object_phrase
+  | Delete 
   | Write of object_phrase
   | Quit
 
