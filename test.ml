@@ -2,12 +2,7 @@ open OUnit2
 open Point
 open Rect
 open Db
-
-(** [ints_from_to x0 x1] is a list of ints from [x0] to [x1] exclusive. *)
-let rec ints_from_to lb ub =
-  match lb = ub with
-  | true -> []
-  | false -> lb :: ints_from_to (lb + 1) ub
+open Regression
 
 let origin_pt = Point.origin
 let empty_rect = Rect.empty
@@ -41,7 +36,6 @@ let enlargement_rect_test
   name >:: (fun _ -> 
       assert_equal expected_output (enlargement_rect rect rect') 
         ~printer:rect_printer)
-
 
 let init_obj = create_element "nil" ["nil"] Point.origin
 
@@ -304,9 +298,11 @@ let assert_find p x expected_result tree =
 *)
 
 let number_entries = 101
-let int_test_tree_entries = number_entries |> ints_from_to 1 |> entries_of_int_range
+let int_test_tree_entries = number_entries |> ints_from_to 1 
+                            |> entries_of_int_range
 let int_test_tree = new_tree (0., 0.) 0
-let () = List.iter (fun (p, x) -> add p x int_test_tree) int_test_tree_entries
+let () = List.iter (fun (p, x) -> add p x int_test_tree) 
+    int_test_tree_entries
 
 let () = remove (9.,9.) 9 int_test_tree
 let () = assert_find (9.,9.) 9 false int_test_tree
@@ -318,3 +314,24 @@ let () = remove (30.,30.) 30 int_test_tree
 let () = assert_find (30.,30.) 30 false int_test_tree
 let () = remove (100.,100.) 100 int_test_tree
 let () = assert_find (100.,100.) 100 false int_test_tree
+
+(* increasing order insertions *)
+let int_test_tree = new_tree (0., 0.) 0
+let () = add_from_to 0 10 int_test_tree
+
+(* decreasing order insertions *)
+let int_test_tree = new_tree (0., 0.) 0
+let () = add_from_to 10 0 int_test_tree
+
+(* random order insertions *)
+let int_test_tree = new_tree (0., 0.) 0
+let () = add_random 100 10 int_test_tree
+
+(* cluster insertions *)
+let int_test_tree = new_tree (1000., 1000.) 1000
+let () = add_cluster 1000 25 10 int_test_tree
+
+(* length test *)
+let int_test_tree = new_tree (0., 0.) 0
+let () = add_from_to 0 1000 int_test_tree
+let () = Printf.printf "length = %d\n" (length int_test_tree)

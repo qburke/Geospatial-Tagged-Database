@@ -1,4 +1,4 @@
-MODULES=rtree point rect db command state
+MODULES=rtree point rect db command state regression
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)

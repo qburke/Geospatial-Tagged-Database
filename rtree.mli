@@ -25,6 +25,12 @@ val mem : Point.t -> 'a -> 'a t -> bool
     (leaf) that contains it. *)
 val find : Point.t -> 'a -> 'a t -> bool * 'a t
 
+(** [to_list r] is the list of Points of the tree *)
+val to_list: 'a t -> (Point.t * 'a) list
+
+(** [length r] is the tree length *)
+val length: 'a t -> int
+
 (** [union r1 r2] returns the set union of [r1] and [r2].
     [r1] contains less than or equal to elements than [r2].
     [r1] and [r2] are not allowed to contain duplicates *)
