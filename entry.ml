@@ -73,4 +73,6 @@ let mbr ent = ent.mbr
 
 let tags ent = ent.tags
 
+let data ent = ent.data
+
 let to_json ent = ent.data

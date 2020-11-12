@@ -1,48 +1,37 @@
-type 'a element = {
-  data : 'a;
-  tags : string list;
-  location : Point.t;
-}
+type element = Entry.t
 
-type 'a spatial_data = ('a element, int) Hashtbl.t
+type spatial_data = (element, int) Hashtbl.t
 
-type 'a tag_collection = ('a element, int) Hashtbl.t
+type tag_collection = (element, int) Hashtbl.t
 
-type 'a reverse_index = (string, 'a tag_collection) Hashtbl.t
+type reverse_index = (string, tag_collection) Hashtbl.t
 
-type 'a database = {
+type database = {
   name : string;
-  elements : ('a, 'a element) Hashtbl.t;
-  rTree : 'a element Rtree.t;
-  tag_index : 'a reverse_index;
+  elements : (string, element) Hashtbl.t;
+  rTree : element Rtree.t;
+  tag_index : reverse_index;
 }
 
-let create_element data tags location =
-  {data = data; tags = tags; location = location}
+let create_element id location tags data = Entry.manual
 
-let data_of_element e =
-  match e with
-  | {data; _} -> data
+let data_of_element = Entry.data
 
-let tags_of_element e =
-  match e with
-    | {tags; _} -> tags
+let tags_of_element = Entry.tags
 
-let location_of_element e =
-  match e with
-  | {location; _} -> location
+let location_of_element = Entry.mbr
 
 (* Hash-tables have no specific type by default when created. Adding in and 
    deleting init_val causes the hash-table to take the type of init_val *)
-let create_db name init_val : 'a database =
+let create_db name init_val : database =
   let new_elements = Hashtbl.create 1000 in
-  let new_rTree = Rtree.new_tree init_val.location init_val in
+  let new_rTree = Rtree.new_tree (Entry.mbr init_val) init_val in
   let new_tag_index = Hashtbl.create 1000 in
   let new_tag_collection = Hashtbl.create 1000 in
-  Hashtbl.add new_elements init_val.data init_val;
+  Hashtbl.add new_elements (Entry.id init_val) init_val;
   Hashtbl.add new_tag_collection init_val 0;
   Hashtbl.add new_tag_index "nil" new_tag_collection;
-  Hashtbl.remove new_elements init_val.data;
+  Hashtbl.remove new_elements (Entry.id init_val);
   Hashtbl.remove new_tag_index "nil";
   {name = name; elements = new_elements;
    rTree = new_rTree; tag_index = new_tag_index}
@@ -60,8 +49,8 @@ let list_of_elements db =
   Hashtbl.fold (fun _ v acc ->v::acc) db.elements []
 
 let add db e =
-  if Hashtbl.mem db.elements e.data then failwith "No duplicates" else
-    let get_tag_collection ri tag : 'a tag_collection =
+  if Hashtbl.mem db.elements (Entry.id e) then failwith "No duplicates" else
+    let get_tag_collection ri tag : tag_collection =
       if Hashtbl.mem ri tag then Hashtbl.find ri tag
       else (Hashtbl.create 1000 |> Hashtbl.add ri tag; Hashtbl.find ri tag) in
     let rec add_to_index data = function
@@ -69,9 +58,9 @@ let add db e =
       | x::xs ->
         Hashtbl.replace (get_tag_collection db.tag_index x) data 0;
         add_to_index data xs in
-    e.tags |> add_to_index e;
-    Hashtbl.replace  db.elements e.data e;
-    Rtree.add e.location e db.rTree
+    e |> Entry.tags |> add_to_index e;
+    Hashtbl.replace  db.elements (Entry.id e) e;
+    Rtree.add (Entry.mbr e) e db.rTree
 
 let tag_search db objects tags =
   let ri_lookup tag elem =

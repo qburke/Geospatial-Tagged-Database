@@ -21,5 +21,8 @@ val mbr : t -> Rect.t
 (** [tags entry] is the list of tags of [entry]. *)
 val tags : t -> string list
 
+(** [data entry] is the JSON data of [entry] *)
+val data : t -> Yojson.Basic.t
+
 (** [to_json entry] is the JSON representation of [entry]. *)
 val to_json : t -> Yojson.Basic.t
