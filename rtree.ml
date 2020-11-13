@@ -205,7 +205,6 @@ let rec find_aux p x = function
     end
   | [] -> failwith "Can't find the node"
 
-
 let find p x tree =
   (* entry is node to be find *)
   let entry = {
@@ -215,7 +214,6 @@ let find p x tree =
   }
   in try find_aux p x [tree] with
   | exc -> false, entry
-
 
 let rec propagate_mbr node = 
   let parent_node = node.parent in
@@ -237,15 +235,15 @@ let remove p x tree =
     end
   | false -> ()
 
+let rec to_list node =
+  match node.children with
+  | `Node lst -> List.fold_left (fun acc el -> acc @ (to_list el)) [] lst
+  | `Entry e ->  [((fst node.mbr), e)]
+
 let rec length node =
   match node.children with
   | `Node lst -> 1 + List.fold_right (fun el t -> max (length el) t) lst 0
   | `Entry e -> 1
-
-let rec to_list node =
-  match node.children with
-  | `Node lst -> List.fold_right (fun el t -> (to_list el) @ t) lst []
-  | `Entry e -> [((fst node.mbr), e)]
 
 let union t1 t2 = empty ()
 
@@ -307,6 +305,3 @@ let from_json f  =
       List.iter (fun x -> add (fst x) (snd x) res) xs;
       res
     end
-
-
-
