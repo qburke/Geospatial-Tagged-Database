@@ -24,3 +24,6 @@ val add_random : int -> int -> int Rtree.t -> unit
 (** [add_cluster mid rad n t] inserts to tree [t] 
     [n] random entries within a given radius [rad] around point [mid]. *)
 val add_cluster : int -> int -> int -> int Rtree.t -> unit
+
+(** [execute test desc] execute the [test] print out test [desc] and time elapse *)
+val execute : (unit->unit) -> string -> unit
