@@ -17,6 +17,8 @@ let create_element = Entry.manual
 
 let data_of_element = Entry.data
 
+let id_of_element = Entry.id
+
 let tags_of_element = Entry.tags
 
 let location_of_element = Entry.mbr

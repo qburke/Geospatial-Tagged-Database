@@ -76,3 +76,5 @@ let tags ent = ent.tags
 let data ent = ent.data
 
 let to_json ent = ent.data
+
+let to_string v ent = ""

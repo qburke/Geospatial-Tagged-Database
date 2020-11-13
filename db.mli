@@ -22,6 +22,8 @@ type database
 (** [create data tags] returns an ['a element] *)
 val create_element : string -> Rect.t -> string list -> Yojson.Basic.t -> element
 
+val id_of_element : element -> string
+
 val data_of_element : element -> Yojson.Basic.t
 
 val tags_of_element : element -> string list

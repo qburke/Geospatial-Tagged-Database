@@ -17,12 +17,12 @@ exception NoDatabaseInitialized
 
 (** [init_state] is the initial state of the interface.
     In that state, no database has been loaded *)
-val init_state : 'a t
+val init_state : t
 
 (** TODO: Add rest of functionality found in command.mli *)
-val add : 'a t -> 'a -> string list -> Point.t -> unit
+val add : t -> string -> string list -> Rect.t -> Yojson.Basic.t -> unit
 
-val get_elems : 'a t -> ('a * Point.t * string list) list
+val get_elems : t -> (string * Rect.t * string list) list
 
 (** [help param] returns a string corresponding to a help phrase
       for the given object phrase *)
@@ -30,8 +30,8 @@ val help : object_phrase -> string
 
 (**  [initialize name dummy] returns a state containing an initialized
      database *)
-val initialize : 'a t -> string -> string t
+val initialize : t -> string -> t
 
-val query_elems : 'a t -> string list -> ('a * Point.t * string list) list
+val query_elems : t -> string list -> (string * Rect.t * string list) list
 
-val is_initialized : 'a t -> bool
+val is_initialized : t -> bool

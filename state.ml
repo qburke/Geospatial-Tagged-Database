@@ -22,19 +22,19 @@ let query_elems st tags =
   match st with
   | Database db ->
     tag_search db (list_of_elements db) tags |>
-    List.map (fun e -> (data_of_element e, location_of_element e, tags_of_element e))
+    List.map (fun e -> (id_of_element e, location_of_element e, tags_of_element e))
   | Empty -> raise NoDatabaseInitialized
 
-let add st data tags location =
+let add st id location tags data =
   match st with
-  | Database db -> create_element data tags location |> Db.add db
+  | Database db -> create_element id tags location data |> Db.add db
   | Empty -> raise NoDatabaseInitialized
 
 let get_elems st =
   match st with
   | Database db ->
     list_of_elements db |>
-    List.map (fun e -> (data_of_element e, location_of_element e, tags_of_element e))
+    List.map (fun e -> (id_of_element e, location_of_element e, tags_of_element e))
   | Empty -> raise NoDatabaseInitialized
 
 let help param =
