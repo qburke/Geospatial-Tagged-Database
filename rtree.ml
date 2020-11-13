@@ -185,8 +185,8 @@ let add e tree =
   in add_aux entry tree
 
 
-let choose_container p node =
-  List.filter (fun c -> Rect.is_in p c.mbr) (children node)
+let choose_container r node =
+  List.filter (fun c -> Rect.contains c.mbr r) (children node)
 
 (** [find_aux entry node] begins at root [node] and searches for Entry that
     matches [entry] *)
@@ -251,48 +251,12 @@ let rec json_of_t t = Yojson.Basic.(
 
 let to_json tree = Yojson.Basic.(`Assoc [("rtree", json_of_t tree)])
 
-let rec mem_aux p x = function
+let rec mem_aux x = function
   | node :: t -> begin
       match node.children with
-      | `Node lst -> mem_aux p x (choose_container p node)
-      | `Entry e -> x = e || mem_aux p x t
+      | `Node lst -> mem_aux x (choose_container (Entry.mbr x) node)
+      | `Entry e -> (Entry.id x = Entry.id e) || mem_aux x t
     end
   | [] -> false
 
-let mem p x r = mem_aux p x [r]
-
-open Yojson.Basic.Util
-
-(** [unwrap_str_list lst] is the string list of tags of the given Yojson string
-    list [lst] of tags. *)
-let unwrap_str_list lst = 
-  List.map (fun x -> to_string x) lst
-
-(** [from_entity e] is a representation of a single data point. *)
-let from_entity 
-    (e : Yojson.Basic.t) : (Point.t * string list) =
-  let lat = e |> member "latitude" |> to_float in
-  let long = e|> member "longitude" |> to_float in
-  let tags = e |> member "tags" |> to_list |> unwrap_str_list in
-  ((lat, long), tags)
-
-(** [from_json f] is the data read from a JSON file [f], containing the 
-    coordinates and the tags of the points stored in the JSON.
-    Required: [f] is a name of a valid json representation of data. *)
-let from_json f  =
-  let data_list = 
-    f 
-    |> Yojson.Basic.from_file 
-    |> to_list
-    |> List.map from_entity in 
-  match data_list with
-  | [] -> failwith "No data in target JSON"
-  | x::[] -> new_tree (fst x) (snd x)
-  | x::xs -> begin 
-      let res = new_tree (fst x) (snd x) in 
-      List.iter (fun x -> add (fst x) (snd x) res) xs;
-      res
-    end
-
-
-
+let mem x r = mem_aux x [r]

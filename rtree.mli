@@ -37,9 +37,3 @@ val find : Entry.t -> t -> bool * t
 
 (** [to_json t] is the JSON representation of [t]. See R Tree schema. *)
 val to_json : t -> Yojson.Basic.t
-
-(** [from_json f] is the R tree read from a JSON file [f], containing the 
-    coordinates and the tags of the points stored in the JSON. *)
-val from_json : string -> t
-
-(*read and conversion operations*)

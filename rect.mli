@@ -15,6 +15,9 @@ val ur : t -> Point.t
 (** [is_in] checks if [pt] is inside of [rect].*)
 val is_in : Point.t -> t -> bool
 
+(** [contains r1 r2] is true if r2 is contained in r1. *)
+val contains : t -> t -> bool
+
 (** [of_point p] is the MBR containing point [p].*)
 val of_point : Point.t -> t
 

@@ -1,18 +1,18 @@
 open Db
-    
-type 'a t =
+
+type t =
   | Empty
-  | Database of 'a database
+  | Database of database
 
 let init_state = Empty
 
 exception DatabaseAlreadyExists
-  
+
 exception NoDatabaseInitialized
 
 let initialize st name  =
   if st != Empty then raise DatabaseAlreadyExists else
-    Database (create_db name (create_element "" [""] (0.,0.)))
+    Database (create_db name)
 
 let is_initialized = function
   | Empty -> false

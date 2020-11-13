@@ -9,12 +9,12 @@ open Command
 *)
 
 (** The abstract type of values representing the database state *)
-type 'a t
+type t
 
 exception DatabaseAlreadyExists
-  
+
 exception NoDatabaseInitialized
-  
+
 (** [init_state] is the initial state of the interface.
     In that state, no database has been loaded *)
 val init_state : 'a t
