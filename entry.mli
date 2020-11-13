@@ -10,10 +10,13 @@ val from_json : Yojson.Basic.t -> t
     attributes are desired, [data] should be [`Null]. [data] should not include
     any of the attributes "id", "tags", or "mbr" ([Entry.from_json] exists for
     this purpose.) *)
-val manual : string -> Rect.t -> string list -> Yojson.Basic.t -> t
+val manual : string -> Point.t -> string list -> Yojson.Basic.t -> t
 
 (** [id entry] is the id of [entry]. *)
 val id : t -> string
+
+(** [loc entry] is the point location of [entry]. *)
+val loc : t -> Point.t
 
 (** [mbr entry] is the mbr of [entry]. *)
 val mbr : t -> Rect.t

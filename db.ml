@@ -21,7 +21,7 @@ let id_of_element = Entry.id
 
 let tags_of_element = Entry.tags
 
-let location_of_element = Entry.mbr
+let location_of_element = Entry.loc
 
 let create_db name : database =
   let new_elements = Hashtbl.create 1000 in

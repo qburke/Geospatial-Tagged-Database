@@ -1,8 +1,8 @@
 exception InvalidInput
-  
+
 let split_str str =
-      str |> String.trim |> String.split_on_char ' '|>
-      List.filter (fun x -> x = "" |> not) 
+  str |> String.trim |> String.split_on_char ' '|>
+  List.filter (fun x -> x = "" |> not) 
 
 let parse_add () st =
   let open State in
@@ -36,7 +36,7 @@ let parse_query () st =
   | xs -> xs     
 
 let print_elems () es =
-  print_endline "Name | Location | Tags";
+  print_endline "ID | Location | Tags";
   print_endline "-----------------------";
   let rec aux = function
     | [] -> ignore 0;
@@ -56,8 +56,8 @@ let open_interface =
       try match read_line () |> parse  with
         | Initialize [name] -> initialize st name |> loop;
         | Add ->
-          let (name,tags,location) = parse_add () st in
-          add st name tags location;
+          let (id,tags,location) = parse_add () st in
+          add st id tags location `Null;
           loop st
         | Query ->
           parse_query () st |> query_elems st |> print_elems (); loop st
@@ -73,8 +73,8 @@ let open_interface =
     with
     | DatabaseAlreadyExists ->
       (print_endline "Cannot initialize multiple databases\nPress enter to continue...";
-      match read_line () with _ -> print_string "";
-        loop st;)
+       match read_line () with _ -> print_string "";
+         loop st;)
     | NoDatabaseInitialized ->
       (print_endline "No database selected\nPress enter to continue...";
        match read_line () with _ -> print_string "";
@@ -85,6 +85,6 @@ let open_interface =
   in
   init_state |> loop
 
-  let main () =
-    ANSITerminal.();
-    open_interface
+let main () =
+  ANSITerminal.();
+  open_interface

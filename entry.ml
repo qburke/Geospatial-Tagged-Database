@@ -1,6 +1,6 @@
 type t = {
   id : string;
-  mbr : Rect.t;
+  loc : Point.t;
   tags : string list;
   data : Yojson.Basic.t
 }
@@ -21,7 +21,7 @@ let extract_point point json = match List.assoc_opt point json with
       (x,y)
     end
   | Some _ -> failwith (point ^ " is not an object")
-  | None -> failwith (point ^ " corner not provided")
+  | None -> failwith (point ^ " not provided")
 
 let from_json json =
   let assoc_list = match json with
@@ -30,14 +30,7 @@ let from_json json =
   let id = match List.assoc_opt "id" assoc_list with
     | Some s -> str_of_json "id is not a string" s
     | None -> failwith "id not provided" in
-  let mbr = match List.assoc_opt "mbr" assoc_list with
-    | Some (`Assoc rect) -> begin
-        let ll = extract_point "ll" rect in
-        let ur = extract_point "ur" rect in
-        (ll, ur)
-      end
-    | Some _ -> failwith "mbr is not an object"
-    | None -> failwith "mbr not provided" in
+  let p = extract_point "location" assoc_list in
   let tags = match List.assoc_opt "tags" assoc_list with
     | Some (`List lst) -> List.map (str_of_json "tags is not a list of strings") lst
     | Some `Null -> []
@@ -45,12 +38,12 @@ let from_json json =
     | None -> failwith "tags not provided" in
   {
     id = id;
-    mbr = mbr;
+    loc = p;
     tags = tags;
     data = json
   }
 
-let manual id mbr tags data = 
+let manual id p tags data = 
   let addtl_data = match data with
     | `Assoc lst -> lst
     | `Null -> []
@@ -58,18 +51,20 @@ let manual id mbr tags data =
   in 
   {
     id = id;
-    mbr = mbr;
+    loc = p;
     tags = tags;
     data = `Assoc (
         ("id", `String id) ::
-        ("mbr", Rect.to_json mbr) ::
+        ("mbr", Point.to_json p) ::
         ("tags", `List (List.map (fun s -> `String s) tags)) ::
         addtl_data);
   }
 
 let id ent = ent.id
 
-let mbr ent = ent.mbr
+let loc ent = ent.loc
+
+let mbr ent = ent.loc |> Rect.of_point
 
 let tags ent = ent.tags
 
@@ -79,6 +74,6 @@ let to_json ent = ent.data
 
 let to_string v ent =
   "id: " ^ ent.id ^ "\n" ^
-  "mbr: " ^ Rect.to_string ent.mbr ^ "\n" ^
+  "mbr: " ^ Point.to_string ent.loc ^ "\n" ^
   "tags: " ^ List.fold_left (fun tag acc -> acc ^ tag ^ ", " ) "" ent.tags ^ "\n" ^
   if v then Yojson.Basic.pretty_to_string ent.data else ""

@@ -197,7 +197,7 @@ let rec find_aux ent = function
   | node :: t -> begin
       match node.children with
       | `Node lst -> find_aux ent (choose_container (Entry.mbr ent) node)
-      | `Entry e -> if (node.mbr = (Entry.mbr ent) && Entry.id ent = Entry.id e) then
+      | `Entry e -> if (node.mbr = (Entry.mbr ent) && Entry.id ent = Entry.id e) then (* TODO change / cleanup*)
           true, node
         else find_aux ent t
     end
