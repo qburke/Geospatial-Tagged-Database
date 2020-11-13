@@ -1,5 +1,5 @@
 B _build
 PKG ounit2
 PKG ANSITerminal
-PKG Yojson
+PKG yojson
 PKG Dolog

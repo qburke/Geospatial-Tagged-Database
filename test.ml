@@ -38,10 +38,10 @@ let enlargement_rect_test
         ~printer:rect_printer)
 
 
-let init_obj = create_element "nil" ["nil"] Point.origin
+let init_obj = create_element "nil" Point.origin ["nil"] `Null
 
-let make_db (elems : 'a element list) =
-  let db = create_db "test db" init_obj in
+let make_db (elems : element list) =
+  let db = create_db "test db" in
   ignore(List.map
            (fun elem -> add db elem) elems);
   db
@@ -51,7 +51,7 @@ let make_db (elems : 'a element list) =
     with [list_of_reverse_index db]. *)
 let list_of_tags_test
     (name : string)
-    (db : 'a database)
+    (db : database)
     (expected_output : string list) : test =
   name >:: (fun _ ->
       assert_equal
@@ -63,35 +63,35 @@ let list_of_tags_test
     with [list_of_tag_collection db tag]. *)
 let tag_contents_test
     (name : string)
-    (db : 'a database)
+    (db : database)
     (tag : string)
     (expected_output : string list) : test =
   name >::  (fun _ ->
       assert_equal
         (List.sort compare expected_output)
         (list_of_tag_collection db tag |>
-         List.map data_of_element |> List.sort compare))
+         List.map id_of_element |> List.sort compare))
 
 (** [tag_search_test name db objects tags expected_output] constructs an OUnit
     test named [name] that asserts the quality of [expected_output]
     with [tag_search_test db objects tags]. *)
 let tag_search_test
     (name : string)
-    (db : 'a database)
-    (objects : 'a element list)
+    (db : database)
+    (objects : element list)
     (tags : string list)
     (expected_output : string list) =
   name >:: (fun _ ->
       assert_equal
         (List.sort compare expected_output)
         (tag_search db objects tags |>
-         List.map data_of_element |>
+         List.map id_of_element |>
          List.sort compare))
 
-let obj1 = create_element "obj1" ["tag1"] Point.origin
-let obj2 = create_element "obj2" ["tag2"] Point.origin
-let obj3 = create_element "obj3" ["tag2"] Point.origin
-let obj4 = create_element "obj4" ["tag1"; "tag2"; "tag3"] Point.origin
+let obj1 = create_element "obj1" Point.origin ["tag1"] `Null
+let obj2 = create_element "obj2" Point.origin ["tag2"] `Null
+let obj3 = create_element "obj3" Point.origin ["tag2"] `Null
+let obj4 = create_element "obj4" Point.origin ["tag1"; "tag2"; "tag3"] `Null
 let empty_db = make_db []
 let one_tag_db = make_db [obj1]
 let two_tag_db = make_db [obj1; obj2]
@@ -154,21 +154,31 @@ let rect_tests = [
 ]
 
 open Rtree
-let int_tree_1 = new_tree (0.,0.) 0
-let () = add (1., 2.) 3 int_tree_1
-let () = add (4., 2.) 3110 int_tree_1
-let () = add (1.1, 2.1) 5 int_tree_1
-let () = add (0.9, 1.9) 64 int_tree_1
+let int_tree_1 = empty ()
+let () = add (Entry.manual "3" (1., 2.) [] `Null) int_tree_1
+let () = add (Entry.manual "3110" (4., 2.) [] `Null) int_tree_1
+let () = add (Entry.manual "5" (1.1, 2.1) [] `Null) int_tree_1
+let () = add (Entry.manual "64" (0.9, 1.9) [] `Null) int_tree_1
 
-let int_tree_2 = new_tree (0., 0.) 0
+let entries_of_int_range lst =
+  List.map (fun i ->
+      Entry.manual
+        (string_of_int i)
+        (float_of_int i, float_of_int i)
+        []
+        `Null
+    )
+    lst
+
+let int_tree_2 = empty ()
 let int_tree_2_entries = 10 |> ints_from_to 0 |> entries_of_int_range
 
-let int_tree_3 = new_tree (0., 0.) 0
-let () = List.iter (fun (p, x) -> add p x int_tree_3) int_tree_2_entries
+let int_tree_3 = empty ()
+let () = List.iter (fun x -> add x int_tree_3) int_tree_2_entries
 
-let int_tree_4 = new_tree (0., 0.) 0
+let int_tree_4 = empty ()
 let () = List.iter
-    (fun (p, x) -> add p x int_tree_4)
+    (fun x -> add x int_tree_4)
     (10000 |> ints_from_to 0 |> entries_of_int_range)
 
 (** [add_test name entries tree dir file expected_output] constructs an OUnit
@@ -176,14 +186,14 @@ let () = List.iter
     [tree] was successful. *)
 let add_test
     (name : string)
-    (entries : (Point.t * 'a) list)
-    (tree : 'a t) : test list =
+    (entries : Entry.t list)
+    (tree : t) : test list =
   List.mapi
-    (fun i (p, x) ->
+    (fun i x ->
        name >::
        (fun _ -> begin
-            add p x tree;
-            assert_equal true (mem p x tree) ~printer:string_of_bool
+            add x tree;
+            assert_equal true (mem x tree) ~printer:string_of_bool
           end)
     )
     entries
@@ -193,24 +203,24 @@ let add_test
     [tree] returns [unit]. *)
 let remove_test 
     (name : string)
-    (entries : (Point.t * 'a) list)
-    (tree : 'a t) : test list =
+    (entries : Entry.t list)
+    (tree : t) : test list =
   List.map
-    (fun (p, x) ->
+    (fun x ->
        name >:: (fun _ ->
-           assert_equal () (remove p x tree))
+           assert_equal () (remove x tree))
     )
     entries
 
 let find_test 
     (name : string)
-    (entries : (Point.t * 'a) list)
-    (tree : 'a t)
-    (output : bool * 'a Rtree.t) : test list =
+    (entries : Entry.t list)
+    (tree : t)
+    (output : bool * Rtree.t) : test list =
   List.map
-    (fun (p, x) ->
+    (fun x ->
        name >:: (fun _ ->
-           assert_equal output (find p x tree))
+           assert_equal output (find x tree))
     )
     entries
 
@@ -219,23 +229,22 @@ let find_test
     with [mem p x tree]. *)
 let mem_test
     (name : string)
-    (loc : Point.t)
-    (data : 'a)
-    (tree : 'a t)
+    (entry : Entry.t)
+    (tree : t)
     (expected_output : bool) : test =
   name >:: (fun _ ->
-      assert_equal expected_output (mem loc data tree) ~printer:string_of_bool)
+      assert_equal expected_output (mem entry tree) ~printer:string_of_bool)
 
 (** [mem_test name p x tree expected_output] constructs an OUnit
     test named [name] that asserts each entry is a member of [tree]. *)
 let mem_list_test
     (name : string)
-    (entries : (Point.t * 'a) list)
-    (tree : 'a t) : test list =
+    (entries : Entry.t list)
+    (tree : t) : test list =
   List.map
-    (fun (p, x) ->
+    (fun x ->
        name >:: (fun _ ->
-           assert_equal true (mem p x tree) ~printer:string_of_bool)
+           assert_equal true (mem x tree) ~printer:string_of_bool)
     )
     entries
 
@@ -244,18 +253,24 @@ let mem_list_test
 let out_json_test
     (name : string)
     (filename : string)
-    (tree : 'a t) : test =
+    (tree : t) : test =
   name >:: (fun _ ->
       assert_equal () (tree |> to_json |> Yojson.Basic.to_file filename))
 
 let rtree_tests = List.flatten [
     [
-      mem_test "3 at (1., 2.) in int_tree_1" (1., 2.) 3 int_tree_1 true;
-      mem_test "3110 at (4., 2.) in int_tree_1" (4., 2.) 3110 int_tree_1 true;
-      mem_test "5 at (1.1, 2.1) in int_tree_1" (1.1, 2.1) 5 int_tree_1 true;
-      mem_test "64 at (0.9, 1.9) in int_tree_1" (0.9, 1.9) 64 int_tree_1 true;
-      mem_test "5 not at (1., 2.) in int_tree_1" (1., 2.) 5 int_tree_1 false;
-      mem_test "64 not at (1., 2.) in int_tree_1" (1., 2.) 64 int_tree_1 false;
+      mem_test "3 at (1., 2.) in int_tree_1"
+        (Entry.manual "3" (1., 2.) [] `Null) int_tree_1 true;
+      mem_test "3110 at (4., 2.) in int_tree_1"
+        (Entry.manual "3110" (4., 2.) [] `Null) int_tree_1 true;
+      mem_test "5 at (1.1, 2.1) in int_tree_1" 
+        (Entry.manual "5" (1.1, 2.1) [] `Null)int_tree_1 true;
+      mem_test "64 at (0.9, 1.9) in int_tree_1"
+        (Entry.manual "64" (0.9, 1.9) [] `Null) int_tree_1 true;
+      mem_test "5 not at (1., 2.) in int_tree_1"
+        (Entry.manual "5" (1., 2.) [] `Null) int_tree_1 false;
+      mem_test "64 not at (1., 2.) in int_tree_1"
+        (Entry.manual "64" (1., 2.) [] `Null) int_tree_1 false;
     ];
     [
       (*remove_test "3 at (1., 2.) in int_tree_1" (1., 2.) 3 int_tree_1;*)
@@ -271,17 +286,29 @@ let rtree_tests = List.flatten [
     ]
   ]
 
+let json = Yojson.Basic.from_file "test_entry.json"
+let ithaca_entry = Entry.from_json json
+
+let entry_tests = [
+  "id is Ithaca" >:: (fun _ -> assert_equal "Ithaca" (Entry.id ithaca_entry));
+  "location is Ithaca" >:: (fun _ -> assert_equal (42.44, -76.50)
+                               (Entry.loc ithaca_entry));
+  "tags have Cornell" >:: (fun _ -> assert_equal true
+                              (ithaca_entry |> Entry.tags |> List.mem "Cornell"));
+]
+
 let suite =
   "test suite for final_project"  >::: List.flatten [
     rect_tests;
     rtree_tests;
     db_tests;
+    entry_tests;
   ]
 
 let _ = run_test_tt_main suite
 
-let assert_find p x expected_result tree =
-  let found, entry = find p x tree in
+let assert_find x expected_result tree =
+  let found, entry = find x tree in
   assert(found = expected_result)
 
 (**  Test Pass, tree without split
@@ -295,6 +322,31 @@ let assert_find p x expected_result tree =
      let () = assert_find (2.5, 2.5) 25 false int_tree_1
 *)
 
+let number_entries = 101
+let int_test_tree_entries = number_entries |> ints_from_to 1 |> entries_of_int_range
+let int_test_tree = Rtree.empty ()
+let () = List.iter (fun x -> add x int_test_tree) int_test_tree_entries
+
+let () = remove
+    (Entry.manual "9" (9., 9.) [] `Null) int_test_tree
+let () = assert_find
+    (Entry.manual "9" (9., 9.) [] `Null) false int_test_tree
+let () = remove
+    (Entry.manual "8" (8., 8.) [] `Null) int_test_tree
+let () = assert_find
+    (Entry.manual "8" (8., 8.) [] `Null) false int_test_tree
+let () = remove
+    (Entry.manual "7" (7., 7.) [] `Null) int_test_tree
+let () = assert_find
+    (Entry.manual "7" (7., 7.) [] `Null) false int_test_tree
+let () = remove
+    (Entry.manual "30" (30., 30.) [] `Null) int_test_tree
+let () = assert_find 
+    (Entry.manual "30" (30., 30.) [] `Null)false int_test_tree
+let () = remove
+    (Entry.manual "100" (100., 100.) [] `Null) int_test_tree
+let () = assert_find 
+    (Entry.manual "100" (100., 100.) [] `Null)false int_test_tree
 
 (**  TODO:  Restore
      let number_entries = 101

@@ -1,10 +1,9 @@
 exception InvalidInput
-  
 module Log = Dolog.Log
 
 let split_str str =
-      str |> String.trim |> String.split_on_char ' '|>
-      List.filter (fun x -> x = "" |> not) 
+  str |> String.trim |> String.split_on_char ' '|>
+  List.filter (fun x -> x = "" |> not) 
 
 let parse_init () st =
   let open State in
@@ -54,7 +53,7 @@ let parse_query () st =
   | xs -> xs     
 
 let print_elems () es =
-  print_endline "Name | Location | Tags";
+  print_endline "ID | Location | Tags";
   print_endline "-----------------------";
   let rec aux = function
     | [] -> ignore 0;
@@ -106,7 +105,7 @@ let open_interface =
           loop st
         | Add ->
           let (name,tags,location) = parse_add () st in
-          time (add st name tags location) ("Added item "^name);
+          time (add st id tags location `Null) ("Added item "^name);
           loop st
         | Delete -> parse_delete () st |> delete_elem st; loop st
         | Write filename -> failwith "unimplemented"
@@ -137,6 +136,6 @@ let open_interface =
   in
   init_state |> loop
 
-  let main () =
-    ANSITerminal.();
-    open_interface
+let main () =
+  ANSITerminal.();
+  open_interface

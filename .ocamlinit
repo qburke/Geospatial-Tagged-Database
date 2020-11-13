@@ -5,4 +5,5 @@
 #directory "_build";;
 #load "point.cmo";;
 #load "rect.cmo";;
+#load "entry.cmo";;
 #load "rtree.cmo";;

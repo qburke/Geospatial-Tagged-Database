@@ -1,51 +1,54 @@
 (** ['a element] is the type of an element of the database.
         which contains data of type ['a] and a set of tags associated
         with it  of type [string list] *)
-type 'a element
+type element
 
 (** ['a spatial_data] is a mutable datastructure for storing elements of
          type ['a] *)
-type 'a spatial_data
+type spatial_data
 
 (** ['a tag_collection] is a mutable set of elements
     of type ['a element]. *)
-type 'a tag_collection
+type tag_collection
 
 (** ['a reverse_index] is a mutable map from strings to elements of
     type ['a tag_collection] *)
-type 'a reverse_index
+type reverse_index
 
 (** ['a database] contains a spatial datastructure and a reverse_index for
     elements of type [a'] *)
-type 'a database
+type database
 
 (** [create data tags] returns an ['a element] *)
-val create_element : 'a -> string list -> Point.t -> 'a element
+val create_element : string -> Point.t -> string list -> Yojson.Basic.t -> element
 
+val id_of_element : element -> string
+
+(* FIXME *)
 val element_of_data : 'a database -> 'a -> 'a element
 
-val data_of_element : 'a element -> 'a
-  
-val tags_of_element : 'a element -> string list
-  
-val location_of_element : 'a element -> Point.t
+val data_of_element : element -> Yojson.Basic.t
 
-val create_db : string -> 'a element -> 'a database 
+val tags_of_element : element -> string list
 
-val list_of_reverse_index : 'a database -> string list
+val location_of_element : element -> Point.t
 
-val list_of_tag_collection : 'a database -> string -> 'a element list
+val create_db : string -> database 
 
-val list_of_elements : 'a database -> 'a element list
+val list_of_reverse_index : database -> string list
+
+val list_of_tag_collection : database -> string -> element list
+
+val list_of_elements : database -> element list
 (** [add db e]  adds the data of type ['a] of an item of type ['a element] to
     the [reverse_index] of [db] for each tag_collection corresponding to the tags of
     [e]. If there is a tag not present in [reverse_index] then a new tag collection is
     created and added to [reverse_index] with the new tag as the key. *)
-val add : 'a database -> 'a element -> unit
+val add : database -> element -> unit
 
 (** [remove db e] removes tye data of type ['a element] from the database *)
 val remove : 'a database -> 'a element -> unit
 
 (** [tag_search db objects tags] takes a collection of objects of type ['a element list] 
     and returns a list of elements which match all of the tags in the [string list] *)
-val tag_search : 'a database -> 'a element list -> string list -> 'a element list
+val tag_search : database -> element list -> string list -> element list

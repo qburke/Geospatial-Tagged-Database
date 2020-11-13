@@ -15,6 +15,9 @@ let is_in (x0, y0) ((x0', y0'), (x1', y1')) =
   let y_in = y0 >= y0' && y0 <= y1' in 
   x_in && y_in
 
+let contains r (p1, p2) =
+  is_in p1 r && is_in p2 r
+
 let area ((x0', y0'), (x1', y1')) =
   let x_len = x1' -. x0' in
   let y_len = y1' -. y0' in
@@ -51,3 +54,12 @@ let enlarge_rect_area r1 r2 =
 let enlarge_rect_peri r1 r2 = 
   let new_rect = enlargement_rect r1 r2
   in new_rect, perimeter new_rect -. perimeter r1
+
+let to_json r =
+  `Assoc [
+    ("ll", r |> ll |> Point.to_json);
+    ("ur", r |> ur |> Point.to_json);
+  ]
+
+let to_string (p1, p2) =
+  "ll=" ^ Point.to_string p1 ^ "ur=" ^ Point.to_string p2

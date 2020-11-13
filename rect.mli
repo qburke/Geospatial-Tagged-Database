@@ -15,6 +15,9 @@ val ur : t -> Point.t
 (** [is_in] checks if [pt] is inside of [rect].*)
 val is_in : Point.t -> t -> bool
 
+(** [contains r1 r2] is true if r2 is contained in r1. *)
+val contains : t -> t -> bool
+
 (** [of_point p] is the MBR containing point [p].*)
 val of_point : Point.t -> t
 
@@ -35,3 +38,9 @@ val enlargement_rect : t -> t -> t
 
 (** [mbr_of_list lst] is the MBR of the the rectangles in [lst].*)
 val mbr_of_list : t list -> t
+
+(** [to_json r] is the JSON representation of [r] *)
+val to_json : t -> Yojson.Basic.t
+
+(** [to_string r] is the string representation of [r] *)
+val to_string : t -> string

@@ -9,47 +9,41 @@ let max_entries = 8
   * access parent
   * mutable bounding box for modifications
 *)
-type 'a t = {
-  mutable parent: 'a t option;
+type t = {
+  mutable parent: t option;
   mutable mbr: Rect.t;
-  mutable children: [`Node of 'a t list | `Entry of 'a]
+  mutable children: [`Node of t list | `Entry of Entry.t]
 }
 
-let empty_leaf par = {
-  parent = Some par;
-  mbr = Rect.empty;
-  children = `Entry None;
-}
-
-let empty emp = {
+let empty () = {
   parent = None;
   mbr = Rect.empty;
   children = `Node [];
 }
 
-let new_tree p x = 
+let new_tree e = 
   let root = {
     parent = None;
-    mbr = Rect.of_point p;
+    mbr = Entry.mbr e;
     children = `Node [];
   } in root.children <- `Node( {
       parent = Some root;
-      mbr = Rect.of_point p;
-      children = `Entry x
+      mbr = Entry.mbr e;
+      children = `Entry e
     } :: []);
   root
 
-let parent (n : 'a t) : 'a t =
+let parent (n : t) : t =
   match n.parent with
   | Some m -> m
   | None -> n
 
-let children (n : 'a t) : 'a t list =
+let children (n : t) : t list =
   match n.children with
   | `Node lst -> lst
   | `Entry _ -> failwith "Entry does not have children"
 
-let value (n : 'a t) : 'a =
+let value (n : t) : Entry.t =
   match n.children with
   | `Node _ -> failwith "Node does not have a value"
   | `Entry e -> e
@@ -63,10 +57,10 @@ let node_append box n =
 let node_remove node entry =
   List.filter (fun el -> el != entry) (children node)
 
-let mbr_of_children (n : 'a t) : Rect.t list =
+let mbr_of_children (n : t) : Rect.t list =
   List.map (fun c -> c.mbr) (children n)
 
-let compare_mbr_x (compare_x : bool) (x1: 'a t) (x2 : 'a t) : int = 
+let compare_mbr_x (compare_x : bool) (x1: t) (x2 : t) : int = 
   let p1 = fst x1.mbr in 
   let p2 = fst x2.mbr in
   let c1 = if compare_x then fst p1 else snd p1 in
@@ -81,13 +75,13 @@ let split_at (n : int) (lst : 'a list) : ('a list * 'a list) =
       | h :: t -> helper (n - 1) t (h::acc) in
   helper n lst []
 
-let sort_subtree_x (lst: 'a t list) (sort_x: bool) : 'a t list = 
+let sort_subtree_x (lst: t list) (sort_x: bool) : t list = 
   List.sort (compare_mbr_x sort_x) lst
 
 let ceil_int n  = n |> ceil |> int_of_float
 
 (* [split n] is the result of splitting [n]  *) 
-let split (n : 'a t list) : ('a t list * 'a t list) =
+let split (n : t list) : (t list * t list) =
   let m = float_of_int (List.length n) in
   let sorted_lsts = [sort_subtree_x n true; sort_subtree_x n false] in
   let start_idx = ceil_int (0.25 *. float_of_int max_boxes) in
@@ -121,7 +115,7 @@ let node_with_children n c_lst =
 
 (* [handle_overflow n] splits [n] into two bounding boxes n and n', updating the
    children of n and its MBR, and adding n' to their shared parent.*)
-let rec handle_overflow (n : ('a t)) : unit =
+let rec handle_overflow (n : t) : unit =
   (* split the children of n to be n and n'*)
   let u, u' = n |> children |> split in
   if n.parent = None then
@@ -155,11 +149,11 @@ let rec handle_overflow (n : ('a t)) : unit =
     if w |> children |> List.length > max_boxes then
       handle_overflow w
 
-(* [choose_subtree p n] is the child of [n] that requires the minimum increase
-   in perimeter to cover [p]. The minimum increase in area is the tie-breaker.*)
-let choose_subtree (p : ('a t)) (n : ('a t)) : 'a t =
+(* [choose_subtree e n] is the child of [n] that requires the minimum increase
+   in perimeter to include [e]. The minimum increase in area is the tie-breaker.*)
+let choose_subtree (e : t) (n : t) : t =
   let enlarge_child c =
-    Rect.(c.mbr |> enlargement_rect p.mbr |> area, c)
+    Rect.(c.mbr |> enlargement_rect e.mbr |> area, c)
   in let choices = List.map (enlarge_child) (children n)
   in let compare_choices c1 c2 = fst c1 -. fst c2 |> ( *. ) 10.0 |> Float.to_int
   in let choices = List.sort (compare_choices) choices
@@ -177,16 +171,19 @@ let rec add_aux entry node =
         handle_overflow pnode
       else ()
     end
+  | `Node [] ->
+    let entry = {entry with parent = Some node }
+    in node_append entry node;
   | `Node lst -> begin
       node.mbr <- enlargement_rect node.mbr entry.mbr;
       add_aux entry (choose_subtree entry node)
     end
 
-let add p x tree =
+let add e tree =
   let entry = {
     parent = None;
-    mbr = Rect.of_point p;
-    children = `Entry x
+    mbr = Entry.mbr e;
+    children = `Entry e
   }
   in add_aux entry tree
 
@@ -195,24 +192,24 @@ let choose_container p node =
 
 (** [find_aux entry node] begins at root [node] and searches for Entry that
     matches [entry] *)
-let rec find_aux p x = function
+let rec find_aux ent = function
   | node :: t -> begin
       match node.children with
-      | `Node lst -> find_aux p x (choose_container p node)
-      | `Entry e -> if (node.mbr = (Rect.of_point p) && x = e) then
+      | `Node lst -> find_aux ent (choose_container (Entry.loc ent) node)
+      | `Entry e -> if (node.mbr = (Entry.mbr ent) && Entry.id ent = Entry.id e) then (* TODO change / cleanup*)
           true, node
-        else find_aux p x t
+        else find_aux ent t
     end
   | [] -> failwith "Can't find the node"
 
-let find p x tree =
+let find e tree =
   (* entry is node to be find *)
   let entry = {
     parent = None;
-    mbr = Rect.of_point p;
-    children = `Entry x
+    mbr = Entry.mbr e;
+    children = `Entry e
   }
-  in try find_aux p x [tree] with
+  in try find_aux e [tree] with
   | exc -> false, entry
 
 let rec propagate_mbr node = 
@@ -225,8 +222,8 @@ let rec propagate_mbr node =
   | Some p -> propagate_mbr p
 
 (* remove does not currently support collapsing--removing level case *)
-let remove p x tree = 
-  let found, node = find p x tree in 
+let remove e tree = 
+  let found, node = find e tree in 
   match found with 
   | true -> begin
       let parent_node = parent node in
@@ -249,6 +246,7 @@ let union t1 t2 = empty ()
 
 let inter t1 t2 = empty ()
 
+(* FIXME *)
 let rec json_of_t t = Yojson.Basic.(
     `Assoc [
       ("bottom-left", (t.mbr |> Rect.ll |> Point.to_json));
@@ -263,45 +261,12 @@ let rec json_of_t t = Yojson.Basic.(
 
 let to_json tree = Yojson.Basic.(`Assoc [("rtree", json_of_t tree)])
 
-let rec mem_aux p x = function
+let rec mem_aux x = function
   | node :: t -> begin
       match node.children with
-      | `Node lst -> mem_aux p x (choose_container p node)
-      | `Entry e -> x = e || mem_aux p x t
+      | `Node lst -> mem_aux x (choose_container (Entry.mbr x) node)
+      | `Entry e -> (Entry.id x = Entry.id e) || mem_aux x t
     end
   | [] -> false
 
-let mem p x r = mem_aux p x [r]
-
-open Yojson.Basic.Util
-
-(** [unwrap_str_list lst] is the string list of tags of the given Yojson string
-    list [lst] of tags. *)
-let unwrap_str_list lst = 
-  List.map (fun x -> to_string x) lst
-
-(** [from_entity e] is a representation of a single data point. *)
-let from_entity 
-    (e : Yojson.Basic.t) : (Point.t * string list) =
-  let lat = e |> member "latitude" |> to_float in
-  let long = e|> member "longitude" |> to_float in
-  let tags = e |> member "tags" |> to_list |> unwrap_str_list in
-  ((lat, long), tags)
-
-(** [from_json f] is the data read from a JSON file [f], containing the 
-    coordinates and the tags of the points stored in the JSON.
-    Required: [f] is a name of a valid json representation of data. *)
-let from_json f  =
-  let data_list = 
-    f 
-    |> Yojson.Basic.from_file 
-    |> to_list
-    |> List.map from_entity in 
-  match data_list with
-  | [] -> failwith "No data in target JSON"
-  | x::[] -> new_tree (fst x) (snd x)
-  | x::xs -> begin 
-      let res = new_tree (fst x) (snd x) in 
-      List.iter (fun x -> add (fst x) (snd x) res) xs;
-      res
-    end
+let mem x r = mem_aux x [r]
