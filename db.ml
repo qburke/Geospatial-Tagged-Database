@@ -19,6 +19,10 @@ let data_of_element = Entry.data
 
 let id_of_element = Entry.id
 
+(* FIXME? *)
+let element_of_data d n =
+  Hashtbl.find d.elements n
+
 let tags_of_element = Entry.tags
 
 let location_of_element = Entry.loc
@@ -55,6 +59,17 @@ let add db e =
     e |> Entry.tags |> add_to_index e;
     Hashtbl.replace  db.elements (Entry.id e) e;
     Rtree.add e db.rTree
+
+let remove db e : unit =
+  let f s =
+    Hashtbl.remove (Hashtbl.find db.tag_index s) e;
+    if Hashtbl.length (Hashtbl.find db.tag_index s) = 0 then
+      Hashtbl.remove db.tag_index s; in
+  if Hashtbl.mem db.elements e.data |> not then failwith "Not in database" else
+    (List.map f e.tags |> ignore;
+     Hashtbl.remove db.elements e.data;
+      Rtree.remove e.location e db.rTree;)
+  
 
 let tag_search db objects tags =
   let ri_lookup tag elem =

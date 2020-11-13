@@ -4,12 +4,13 @@ type search_parameter = string list
 
 type command =
   | Help of object_phrase
-  | Initialize of object_phrase
+  | Initialize
   | Load of object_phrase
   | Query 
   | List
+  | Tags
   | Add
-  | Delete of object_phrase
+  | Delete 
   | Write of object_phrase
   | Quit
 
@@ -22,7 +23,7 @@ let parse str =
     let parse_cmd = function
       | [] | [""] -> raise Empty
       | "help"::xs -> Help xs
-      | "initialize"::name::[] -> Initialize [name]
+      | "initialize"::[] -> Initialize
       | "initialize"::_ -> raise Malformed
       | "load"::[] -> raise Malformed
       | "load"::xs -> Load xs
@@ -32,8 +33,10 @@ let parse str =
       | "add"::_ -> raise Malformed
       | "list"::[] -> List
       | "list"::_ -> raise Malformed
-      | "delete"::[] -> raise Malformed
-      | "delete"::xs -> Delete xs
+      | "tags"::[] -> Tags
+      | "tags"::_ -> raise Malformed
+      | "delete"::[] -> Delete
+      | "delete"::_ -> raise Malformed
       | "write"::xs -> Write xs
       | "quit"::[] -> Quit
       | "quit"::_ | _ -> raise Malformed in

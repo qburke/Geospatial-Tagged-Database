@@ -187,22 +187,20 @@ let add e tree =
   }
   in add_aux entry tree
 
-
-let choose_container r node =
-  List.filter (fun c -> Rect.contains c.mbr r) (children node)
+let choose_container p node =
+  List.filter (fun c -> Rect.is_in p c.mbr) (children node)
 
 (** [find_aux entry node] begins at root [node] and searches for Entry that
     matches [entry] *)
 let rec find_aux ent = function
   | node :: t -> begin
       match node.children with
-      | `Node lst -> find_aux ent (choose_container (Entry.mbr ent) node)
+      | `Node lst -> find_aux ent (choose_container (Entry.loc ent) node)
       | `Entry e -> if (node.mbr = (Entry.mbr ent) && Entry.id ent = Entry.id e) then (* TODO change / cleanup*)
           true, node
         else find_aux ent t
     end
   | [] -> failwith "Can't find the node"
-
 
 let find e tree =
   (* entry is node to be find *)
@@ -213,7 +211,6 @@ let find e tree =
   }
   in try find_aux e [tree] with
   | exc -> false, entry
-
 
 let rec propagate_mbr node = 
   let parent_node = node.parent in
@@ -234,6 +231,16 @@ let remove e tree =
       propagate_mbr parent_node;
     end
   | false -> ()
+
+let rec to_list node =
+  match node.children with
+  | `Node lst -> List.fold_left (fun acc el -> acc @ (to_list el)) [] lst
+  | `Entry e ->  [((fst node.mbr), e)]
+
+let rec length node =
+  match node.children with
+  | `Node lst -> 1 + List.fold_right (fun el t -> max (length el) t) lst 0
+  | `Entry e -> 1
 
 let union t1 t2 = empty ()
 
