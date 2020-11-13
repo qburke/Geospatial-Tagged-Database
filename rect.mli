@@ -41,3 +41,6 @@ val mbr_of_list : t list -> t
 
 (** [to_json r] is the JSON representation of [r] *)
 val to_json : t -> Yojson.Basic.t
+
+(** [to_string r] is the string representation of [r] *)
+val to_string : t -> string

@@ -60,3 +60,6 @@ let to_json r =
     ("ll", r |> ll |> Point.to_json);
     ("ur", r |> ur |> Point.to_json);
   ]
+
+let to_string (p1, p2) =
+  "ll=" ^ Point.to_string p1 ^ "ur=" ^ Point.to_string p2

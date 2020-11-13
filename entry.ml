@@ -77,4 +77,8 @@ let data ent = ent.data
 
 let to_json ent = ent.data
 
-let to_string v ent = ""
+let to_string v ent =
+  "id: " ^ ent.id ^ "\n" ^
+  "mbr: " ^ Rect.to_string ent.mbr ^ "\n" ^
+  "tags: " ^ List.fold_left (fun tag acc -> acc ^ tag ^ ", " ) "" ent.tags ^ "\n" ^
+  if v then Yojson.Basic.pretty_to_string ent.data else ""
