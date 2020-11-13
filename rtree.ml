@@ -237,15 +237,16 @@ let remove p x tree =
     end
   | false -> ()
 
+let rec to_list node =
+  match node.children with
+  | `Node lst -> List.fold_right (fun el t -> (to_list el) @ t) lst []
+  | `Entry e ->  [((fst node.mbr), e)]
+
+
 let rec length node =
   match node.children with
   | `Node lst -> 1 + List.fold_right (fun el t -> max (length el) t) lst 0
   | `Entry e -> 1
-
-let rec to_list node =
-  match node.children with
-  | `Node lst -> List.fold_right (fun el t -> (to_list el) @ t) lst []
-  | `Entry e -> [((fst node.mbr), e)]
 
 let union t1 t2 = empty ()
 

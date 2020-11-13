@@ -3,14 +3,18 @@ open Rtree
 let rec ints_from_to lb ub =
   match lb = ub with
   | true -> []
-  | false -> lb :: ints_from_to (lb + 1) ub
+  | false -> lb::ints_from_to (lb + 1) ub
 
 let entries_of_int_range lst =
   List.map (fun i -> ((float_of_int i, float_of_int i), i)) lst
 
-let floats_from_to lb ub =
-  let lst = ints_from_to lb ub in
-  entries_of_int_range lst
+let rec floats_from_to lb ub =
+  let rec floats_from_to_aux lb ub acc =
+    match lb = ub with
+    | true -> acc
+    | false -> floats_from_to_aux (lb + 1) ub 
+                 (((float_of_int lb, float_of_int lb), lb)::acc)
+  in List.rev (floats_from_to_aux lb ub [])
 
 let add_from_to lb ub t =
   if lb < ub then let lst = floats_from_to lb ub in
@@ -32,6 +36,7 @@ let add_random range n t = add_rand 0 range n t
 
 let add_cluster mid rad n t = add_rand (mid - rad) (rad * 2) n t
 
+
 module Log = Dolog.Log
 
 let enable_log_info =
@@ -49,3 +54,4 @@ let execute (u:unit->unit) (m:string) : unit =
     let elapsed = (e -. s)*.(10.**6.) in
     Log.info "%s in %.2f us" m elapsed
   end
+

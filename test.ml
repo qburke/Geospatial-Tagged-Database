@@ -37,6 +37,7 @@ let enlargement_rect_test
       assert_equal expected_output (enlargement_rect rect rect') 
         ~printer:rect_printer)
 
+
 let init_obj = create_element "nil" ["nil"] Point.origin
 
 let make_db (elems : 'a element list) =
@@ -158,9 +159,6 @@ let () = add (1., 2.) 3 int_tree_1
 let () = add (4., 2.) 3110 int_tree_1
 let () = add (1.1, 2.1) 5 int_tree_1
 let () = add (0.9, 1.9) 64 int_tree_1
-
-let entries_of_int_range lst =
-  List.map (fun i -> ((float_of_int i, float_of_int i), i)) lst
 
 let int_tree_2 = new_tree (0., 0.) 0
 let int_tree_2_entries = 10 |> ints_from_to 0 |> entries_of_int_range
@@ -297,58 +295,74 @@ let assert_find p x expected_result tree =
      let () = assert_find (2.5, 2.5) 25 false int_tree_1
 *)
 
-let number_entries = 101
-let int_test_tree_entries = number_entries |> ints_from_to 1 
-                            |> entries_of_int_range
+
+(**  TODO:  Restore
+     let number_entries = 101
+     let int_test_tree_entries = number_entries 
+     |> ints_from_to 1 |> entries_of_int_range
+     let int_test_tree = new_tree (0., 0.) 0
+     let () = List.iter (fun (p, x) -> 
+     add p x int_test_tree) int_test_tree_entries
+
+     let () = remove (9.,9.) 9 int_test_tree
+     let () = assert_find (9.,9.) 9 false int_test_tree
+     let () = remove (8.,8.) 8 int_test_tree
+     let () = assert_find (8.,8.) 8 false int_test_tree
+     let () = remove (7.,7.) 7 int_test_tree
+     let () = assert_find (7.,7.) 7 false int_test_tree
+     let () = remove (30.,30.) 30 int_test_tree
+     let () = assert_find (30.,30.) 30 false int_test_tree
+     let () = remove (100.,100.) 100 int_test_tree
+     let () = assert_find (100.,100.) 100 false int_test_tree
+*)
+
+let elements_count = 1000000
+
+(* [add] regression increasing order *)
 let int_test_tree = new_tree (0., 0.) 0
-let () = List.iter (fun (p, x) -> add p x int_test_tree) 
-    int_test_tree_entries
+let () = execute (fun () -> add_from_to 0 elements_count int_test_tree)
+    (Printf.sprintf "test adding %d elements increasing order" elements_count)
 
-let () = remove (9.,9.) 9 int_test_tree
-let () = assert_find (9.,9.) 9 false int_test_tree
-let () = remove (8.,8.) 8 int_test_tree
-let () = assert_find (8.,8.) 8 false int_test_tree
-let () = remove (7.,7.) 7 int_test_tree
-let () = assert_find (7.,7.) 7 false int_test_tree
-let () = remove (30.,30.) 30 int_test_tree
-let () = assert_find (30.,30.) 30 false int_test_tree
-let () = remove (100.,100.) 100 int_test_tree
-let () = assert_find (100.,100.) 100 false int_test_tree
-
-
-(* adding 0 - 100000 elements increasing order *)
+(* [add] regression decreasing order *)
 let int_test_tree = new_tree (0., 0.) 0
-let () = execute (fun () -> add_from_to 0 100000 int_test_tree) 
-    "test adding 0-100000 elements increasing order"
+let () = execute (fun () -> add_from_to elements_count 0 int_test_tree)
+    (Printf.sprintf "test adding %d elements decreasing order" elements_count)
 
-(* adding 0 - 100000 elements increasing order *)
+(* [add] regression random order *)
 let int_test_tree = new_tree (0., 0.) 0
-let () = execute (fun () -> add_from_to 100000 0 int_test_tree) 
-    "test adding 100000-0 elements decreasing order"
+let () = execute (fun () -> add_random elements_count 
+                     elements_count int_test_tree)
+    (Printf.sprintf "test adding %d random elements" elements_count)
 
-(* adding 0 - 100000 elements random order *)
+(* [add] regression cluster element *)
+let int_test_tree = new_tree (float_of_int elements_count, 
+                              float_of_int elements_count) elements_count
+let () = execute (fun () -> add_cluster elements_count 
+                     (elements_count/10) elements_count int_test_tree)
+    (Printf.sprintf "test adding %d cluster elements" elements_count)
+
+(* [length] regression *)
 let int_test_tree = new_tree (0., 0.) 0
-let () = execute (fun () -> add_random 100000 100000 int_test_tree) 
-    "test adding 100000 random elements"
+let () = add_from_to 0 elements_count int_test_tree
+let () = Printf.printf "Tree with %d element has tree length of = %d\n" 
+    elements_count (length int_test_tree)
 
-(* adding 100000 cluster element *)
-let int_test_tree = new_tree (100000., 100000.) 100000
-let () = execute (fun () -> add_cluster 100000 10000 100000 int_test_tree) 
-    "test adding 100000 cluster elements"
 
-(* length test *)
+let elements_count = 100000
+
 let int_test_tree = new_tree (0., 0.) 0
-let () = add_from_to 0 100000 int_test_tree
-let () = Printf.printf "Tree with 100000 element has tree length of = %d\n" 
-    (length int_test_tree)
+let () = add_from_to 0 elements_count int_test_tree
 
-(* find test *)
+(* [find] regression *)
 let lst = to_list int_test_tree
-let () = execute (fun () -> 
-    List.iter (fun (p, v) -> ignore (find p v int_test_tree)) lst) 
-    "test finding 100000 cluster elements"
+let () = execute (fun () -> List.iter (fun (p, v) -> 
+    ignore (find p v int_test_tree)) lst)
+    (Printf.sprintf "test finding %d cluster elements" elements_count)
 
-(* remove test *)
-let () = execute (fun () -> 
-    List.iter (fun (p, v) -> remove p v int_test_tree) lst) 
-    "test removing 100000 cluster elements"
+(* [remove] regression *)
+let () = execute (fun () -> List.iter (fun (p, v) -> 
+    remove p v int_test_tree) lst)
+    (Printf.sprintf "test removing %d cluster elements" elements_count)
+
+let lst = to_list int_test_tree
+let () = assert(List.length lst = 0)
