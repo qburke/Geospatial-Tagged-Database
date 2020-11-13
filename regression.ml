@@ -31,3 +31,21 @@ let add_rand base range n t =
 let add_random range n t = add_rand 0 range n t
 
 let add_cluster mid rad n t = add_rand (mid - rad) (rad * 2) n t
+
+module Log = Dolog.Log
+
+let enable_log_info =
+  begin
+    Log.set_log_level Log.INFO;
+    Log.color_on ();
+    Log.set_output stdout;
+  end
+
+let execute (u:unit->unit) (m:string) : unit =
+  begin
+    let s = Unix.gettimeofday () in
+    u ();
+    let e = Unix.gettimeofday () in
+    let elapsed = (e -. s)*.(10.**6.) in
+    Log.info "%s in %.2f us" m elapsed
+  end

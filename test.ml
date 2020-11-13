@@ -315,23 +315,40 @@ let () = assert_find (30.,30.) 30 false int_test_tree
 let () = remove (100.,100.) 100 int_test_tree
 let () = assert_find (100.,100.) 100 false int_test_tree
 
-(* increasing order insertions *)
-let int_test_tree = new_tree (0., 0.) 0
-let () = add_from_to 0 10 int_test_tree
 
-(* decreasing order insertions *)
+(* adding 0 - 100000 elements increasing order *)
 let int_test_tree = new_tree (0., 0.) 0
-let () = add_from_to 10 0 int_test_tree
+let () = execute (fun () -> add_from_to 0 100000 int_test_tree) 
+    "test adding 0-100000 elements increasing order"
 
-(* random order insertions *)
+(* adding 0 - 100000 elements increasing order *)
 let int_test_tree = new_tree (0., 0.) 0
-let () = add_random 100 10 int_test_tree
+let () = execute (fun () -> add_from_to 100000 0 int_test_tree) 
+    "test adding 100000-0 elements decreasing order"
 
-(* cluster insertions *)
-let int_test_tree = new_tree (1000., 1000.) 1000
-let () = add_cluster 1000 25 10 int_test_tree
+(* adding 0 - 100000 elements random order *)
+let int_test_tree = new_tree (0., 0.) 0
+let () = execute (fun () -> add_random 100000 100000 int_test_tree) 
+    "test adding 100000 random elements"
+
+(* adding 100000 cluster element *)
+let int_test_tree = new_tree (100000., 100000.) 100000
+let () = execute (fun () -> add_cluster 100000 10000 100000 int_test_tree) 
+    "test adding 100000 cluster elements"
 
 (* length test *)
 let int_test_tree = new_tree (0., 0.) 0
-let () = add_from_to 0 1000 int_test_tree
-let () = Printf.printf "length = %d\n" (length int_test_tree)
+let () = add_from_to 0 100000 int_test_tree
+let () = Printf.printf "Tree with 100000 element has tree length of = %d\n" 
+    (length int_test_tree)
+
+(* find test *)
+let lst = to_list int_test_tree
+let () = execute (fun () -> 
+    List.iter (fun (p, v) -> ignore (find p v int_test_tree)) lst) 
+    "test finding 100000 cluster elements"
+
+(* remove test *)
+let () = execute (fun () -> 
+    List.iter (fun (p, v) -> remove p v int_test_tree) lst) 
+    "test removing 100000 cluster elements"
