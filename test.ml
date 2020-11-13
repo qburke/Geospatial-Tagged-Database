@@ -43,7 +43,7 @@ let enlargement_rect_test
         ~printer:rect_printer)
 
 
-let init_obj = create_element "nil" Rect.empty ["nil"] `Null
+let init_obj = create_element "nil" Point.origin ["nil"] `Null
 
 let make_db (elems : element list) =
   let db = create_db "test db" in
@@ -93,10 +93,10 @@ let tag_search_test
          List.map id_of_element |>
          List.sort compare))
 
-let obj1 = create_element "obj1" Rect.empty ["tag1"] `Null
-let obj2 = create_element "obj2" Rect.empty ["tag2"] `Null
-let obj3 = create_element "obj3" Rect.empty ["tag2"] `Null
-let obj4 = create_element "obj4" Rect.empty ["tag1"; "tag2"; "tag3"] `Null
+let obj1 = create_element "obj1" Point.origin ["tag1"] `Null
+let obj2 = create_element "obj2" Point.origin ["tag2"] `Null
+let obj3 = create_element "obj3" Point.origin ["tag2"] `Null
+let obj4 = create_element "obj4" Point.origin ["tag1"; "tag2"; "tag3"] `Null
 let empty_db = make_db []
 let one_tag_db = make_db [obj1]
 let two_tag_db = make_db [obj1; obj2]
@@ -160,16 +160,16 @@ let rect_tests = [
 
 open Rtree
 let int_tree_1 = empty ()
-let () = add (Entry.manual "3" (Rect.of_point (1., 2.)) [] `Null) int_tree_1
-let () = add (Entry.manual "3110" (Rect.of_point (4., 2.)) [] `Null) int_tree_1
-let () = add (Entry.manual "5" (Rect.of_point (1.1, 2.1)) [] `Null) int_tree_1
-let () = add (Entry.manual "64" (Rect.of_point (0.9, 1.9)) [] `Null) int_tree_1
+let () = add (Entry.manual "3" (1., 2.) [] `Null) int_tree_1
+let () = add (Entry.manual "3110" (4., 2.) [] `Null) int_tree_1
+let () = add (Entry.manual "5" (1.1, 2.1) [] `Null) int_tree_1
+let () = add (Entry.manual "64" (0.9, 1.9) [] `Null) int_tree_1
 
 let entries_of_int_range lst =
   List.map (fun i ->
       Entry.manual
         (string_of_int i)
-        (Rect.of_point (float_of_int i, float_of_int i))
+        (float_of_int i, float_of_int i)
         []
         `Null
     )
@@ -265,17 +265,17 @@ let out_json_test
 let rtree_tests = List.flatten [
     [
       mem_test "3 at (1., 2.) in int_tree_1"
-        (Entry.manual "3" (Rect.of_point (1., 2.)) [] `Null) int_tree_1 true;
+        (Entry.manual "3" (1., 2.) [] `Null) int_tree_1 true;
       mem_test "3110 at (4., 2.) in int_tree_1"
-        (Entry.manual "3110" (Rect.of_point (4., 2.)) [] `Null) int_tree_1 true;
+        (Entry.manual "3110" (4., 2.) [] `Null) int_tree_1 true;
       mem_test "5 at (1.1, 2.1) in int_tree_1" 
-        (Entry.manual "5" (Rect.of_point (1.1, 2.1)) [] `Null)int_tree_1 true;
+        (Entry.manual "5" (1.1, 2.1) [] `Null)int_tree_1 true;
       mem_test "64 at (0.9, 1.9) in int_tree_1"
-        (Entry.manual "64" (Rect.of_point (0.9, 1.9)) [] `Null) int_tree_1 true;
+        (Entry.manual "64" (0.9, 1.9) [] `Null) int_tree_1 true;
       mem_test "5 not at (1., 2.) in int_tree_1"
-        (Entry.manual "5" (Rect.of_point (1., 2.)) [] `Null) int_tree_1 false;
+        (Entry.manual "5" (1., 2.) [] `Null) int_tree_1 false;
       mem_test "64 not at (1., 2.) in int_tree_1"
-        (Entry.manual "64" (Rect.of_point (1., 2.)) [] `Null) int_tree_1 false;
+        (Entry.manual "64" (1., 2.) [] `Null) int_tree_1 false;
     ];
     [
       (*remove_test "3 at (1., 2.) in int_tree_1" (1., 2.) 3 int_tree_1;*)
@@ -296,8 +296,8 @@ let ithaca_entry = Entry.from_json json
 
 let entry_tests = [
   "id is Ithaca" >:: (fun _ -> assert_equal "Ithaca" (Entry.id ithaca_entry));
-  "mbr is Ithaca" >:: (fun _ -> assert_equal ((42.43, -76.53), (42.46, -76.48))
-                          (Entry.mbr ithaca_entry));
+  "location is Ithaca" >:: (fun _ -> assert_equal (42.44, -76.50)
+                               (Entry.loc ithaca_entry));
   "tags have Cornell" >:: (fun _ -> assert_equal true
                               (ithaca_entry |> Entry.tags |> List.mem "Cornell"));
 ]
@@ -333,22 +333,22 @@ let int_test_tree = Rtree.empty ()
 let () = List.iter (fun x -> add x int_test_tree) int_test_tree_entries
 
 let () = remove
-    (Entry.manual "9" (Rect.of_point (9., 9.)) [] `Null) int_test_tree
+    (Entry.manual "9" (9., 9.) [] `Null) int_test_tree
 let () = assert_find
-    (Entry.manual "9" (Rect.of_point (9., 9.)) [] `Null) false int_test_tree
+    (Entry.manual "9" (9., 9.) [] `Null) false int_test_tree
 let () = remove
-    (Entry.manual "8" (Rect.of_point (8., 8.)) [] `Null) int_test_tree
+    (Entry.manual "8" (8., 8.) [] `Null) int_test_tree
 let () = assert_find
-    (Entry.manual "8" (Rect.of_point (8., 8.)) [] `Null) false int_test_tree
+    (Entry.manual "8" (8., 8.) [] `Null) false int_test_tree
 let () = remove
-    (Entry.manual "7" (Rect.of_point (7., 7.)) [] `Null) int_test_tree
+    (Entry.manual "7" (7., 7.) [] `Null) int_test_tree
 let () = assert_find
-    (Entry.manual "7" (Rect.of_point (7., 7.)) [] `Null) false int_test_tree
+    (Entry.manual "7" (7., 7.) [] `Null) false int_test_tree
 let () = remove
-    (Entry.manual "30" (Rect.of_point (30., 30.)) [] `Null) int_test_tree
+    (Entry.manual "30" (30., 30.) [] `Null) int_test_tree
 let () = assert_find 
-    (Entry.manual "30" (Rect.of_point (30., 30.)) [] `Null)false int_test_tree
+    (Entry.manual "30" (30., 30.) [] `Null)false int_test_tree
 let () = remove
-    (Entry.manual "100" (Rect.of_point (100., 100.)) [] `Null) int_test_tree
+    (Entry.manual "100" (100., 100.) [] `Null) int_test_tree
 let () = assert_find 
-    (Entry.manual "100" (Rect.of_point (100., 100.)) [] `Null)false int_test_tree
+    (Entry.manual "100" (100., 100.) [] `Null)false int_test_tree
