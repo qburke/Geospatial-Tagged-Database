@@ -26,10 +26,10 @@ val mem : Entry.t -> t -> bool
 val find : Entry.t -> t -> bool * t
 
 (** [to_list r] is the list of Points of the tree *)
-val to_list: 'a t -> (Point.t * 'a) list
+val to_list: t -> Entry.t list
 
 (** [length r] is the tree length *)
-val length: 'a t -> int
+val length: t -> int
 
 (** [union r1 r2] returns the set union of [r1] and [r2].
     [r1] contains less than or equal to elements than [r2].

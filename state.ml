@@ -37,7 +37,7 @@ let delete_elem st n =
   | Empty -> raise NoDatabaseInitialized
   | Database db ->
     let e =
-      try element_of_data db n with
+      try find db n with
       | Not_found -> raise DataNotFound in
     remove db e
 

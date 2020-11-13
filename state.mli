@@ -34,8 +34,8 @@ val add : t -> string -> string list -> Point.t -> Yojson.Basic.t -> unit
 val get_elems : t -> (string * Point.t * string list) list
 
 (** [query_elems  st tags] returns a tuple of element components that 
-match the given list of [tags] *)
-val query_elems : t -> string list -> (id * Point.t * string list) list
+    match the given list of [tags] *)
+val query_elems : t -> string list -> (string * Point.t * string list) list
 
 (** [delete_elem st n] deletes an element with name [n] from [st].
     Raises an exception if the element is not found in the [st] or
@@ -44,7 +44,7 @@ val delete_elem : t -> string -> unit
 
 (** [get_tags st] returns a list of tags in [st].
     Raises an exception if [st] is unitialized *)
-val get_tags : 'a t -> string list
+val get_tags : t -> string list
 
 (** [help param] returns a string corresponding to a help phrase
       for the given object phrase *)

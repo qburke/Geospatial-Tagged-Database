@@ -25,7 +25,7 @@ val create_element : string -> Point.t -> string list -> Yojson.Basic.t -> eleme
 val id_of_element : element -> string
 
 (* FIXME *)
-val element_of_data : 'a database -> 'a -> 'a element
+val find : database -> string -> element
 
 val data_of_element : element -> Yojson.Basic.t
 
@@ -46,8 +46,8 @@ val list_of_elements : database -> element list
     created and added to [reverse_index] with the new tag as the key. *)
 val add : database -> element -> unit
 
-(** [remove db e] removes tye data of type ['a element] from the database *)
-val remove : 'a database -> 'a element -> unit
+(** [remove db e] removes the data represented by [e] from the database *)
+val remove : database -> element -> unit
 
 (** [tag_search db objects tags] takes a collection of objects of type ['a element list] 
     and returns a list of elements which match all of the tags in the [string list] *)

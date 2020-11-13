@@ -104,8 +104,8 @@ let open_interface =
           time (queries |> query_elems st |> print_elems ()) ("Query complete in"); 
           loop st
         | Add ->
-          let (name,tags,location) = parse_add () st in
-          time (add st id tags location `Null) ("Added item "^name);
+          let (id,tags,location) = parse_add () st in
+          time (add st id tags location `Null) ("Added item "^id);
           loop st
         | Delete -> parse_delete () st |> delete_elem st; loop st
         | Write filename -> failwith "unimplemented"
@@ -124,8 +124,8 @@ let open_interface =
     with
     | DatabaseAlreadyExists ->
       (Log.error "Cannot initialize multiple databases\nPress enter to continue...";
-      match read_line () with _ -> print_string "";
-        loop st;)
+       match read_line () with _ -> print_string "";
+         loop st;)
     | NoDatabaseInitialized ->
       (Log.error "No database selected\nPress enter to continue...";
        match read_line () with _ -> print_string "";

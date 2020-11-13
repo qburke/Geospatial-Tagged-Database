@@ -13,14 +13,14 @@ let rec floats_from_to lb ub =
     match lb = ub with
     | true -> acc
     | false -> floats_from_to_aux (lb + 1) ub 
-                 (((float_of_int lb, float_of_int lb), lb)::acc)
+                 (((float_of_int lb, float_of_int lb), string_of_int lb)::acc)
   in List.rev (floats_from_to_aux lb ub [])
 
 let add_from_to lb ub t =
   if lb < ub then let lst = floats_from_to lb ub in
-    List.iter (fun (p, x) -> add p x t) lst
+    List.iter (fun (p, x) -> add (Entry.manual x p [] `Null) t) lst
   else let lst = List.rev (floats_from_to ub lb) in
-    List.iter (fun (p, x) -> add p x t) lst
+    List.iter (fun (p, x) -> add (Entry.manual x p [] `Null) t) lst
 
 (** [add_rand base range n t] inserts  to tree [t] 
     [n] random entries between [base] and [base] + [range]*)
@@ -29,7 +29,8 @@ let add_rand base range n t =
   for i = 1 to n + 1 do
     let x_int = base + (Random.int range) in
     let x_float = float_of_int x_int in
-    add (x_float, x_float) x_int t
+    let x_str = string_of_int x_int in
+    add (Entry.manual x_str (x_float, x_float) [] `Null) t
   done
 
 let add_random range n t = add_rand 0 range n t

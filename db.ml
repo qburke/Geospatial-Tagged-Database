@@ -19,9 +19,8 @@ let data_of_element = Entry.data
 
 let id_of_element = Entry.id
 
-(* FIXME? *)
-let element_of_data d n =
-  Hashtbl.find d.elements n
+let find d id =
+  Hashtbl.find d.elements id
 
 let tags_of_element = Entry.tags
 
@@ -65,11 +64,11 @@ let remove db e : unit =
     Hashtbl.remove (Hashtbl.find db.tag_index s) e;
     if Hashtbl.length (Hashtbl.find db.tag_index s) = 0 then
       Hashtbl.remove db.tag_index s; in
-  if Hashtbl.mem db.elements e.data |> not then failwith "Not in database" else
-    (List.map f e.tags |> ignore;
-     Hashtbl.remove db.elements e.data;
-      Rtree.remove e.location e db.rTree;)
-  
+  if Hashtbl.mem db.elements (Entry.id e) |> not then failwith "Not in database" else
+    (List.map f (Entry.tags e) |> ignore;
+     Hashtbl.remove db.elements (Entry.id e);
+     Rtree.remove e db.rTree;)
+
 
 let tag_search db objects tags =
   let ri_lookup tag elem =

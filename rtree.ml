@@ -235,7 +235,7 @@ let remove e tree =
 let rec to_list node =
   match node.children with
   | `Node lst -> List.fold_left (fun acc el -> acc @ (to_list el)) [] lst
-  | `Entry e ->  [((fst node.mbr), e)]
+  | `Entry e ->  [e]
 
 let rec length node =
   match node.children with
@@ -264,7 +264,7 @@ let to_json tree = Yojson.Basic.(`Assoc [("rtree", json_of_t tree)])
 let rec mem_aux x = function
   | node :: t -> begin
       match node.children with
-      | `Node lst -> mem_aux x (choose_container (Entry.mbr x) node)
+      | `Node lst -> mem_aux x (choose_container (Entry.loc x) node)
       | `Entry e -> (Entry.id x = Entry.id e) || mem_aux x t
     end
   | [] -> false
