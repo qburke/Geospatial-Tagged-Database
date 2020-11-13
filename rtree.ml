@@ -149,11 +149,11 @@ let rec handle_overflow (n : t) : unit =
     if w |> children |> List.length > max_boxes then
       handle_overflow w
 
-(* [choose_subtree p n] is the child of [n] that requires the minimum increase
-   in perimeter to cover [p]. The minimum increase in area is the tie-breaker.*)
-let choose_subtree (p : t) (n : t) : t =
+(* [choose_subtree e n] is the child of [n] that requires the minimum increase
+   in perimeter to include [e]. The minimum increase in area is the tie-breaker.*)
+let choose_subtree (e : t) (n : t) : t =
   let enlarge_child c =
-    Rect.(c.mbr |> enlargement_rect p.mbr |> area, c)
+    Rect.(c.mbr |> enlargement_rect e.mbr |> area, c)
   in let choices = List.map (enlarge_child) (children n)
   in let compare_choices c1 c2 = fst c1 -. fst c2 |> ( *. ) 10.0 |> Float.to_int
   in let choices = List.sort (compare_choices) choices
@@ -171,6 +171,9 @@ let rec add_aux entry node =
         handle_overflow pnode
       else ()
     end
+  | `Node [] ->
+    let entry = {entry with parent = Some node }
+    in node_append entry node;
   | `Node lst -> begin
       node.mbr <- enlargement_rect node.mbr entry.mbr;
       add_aux entry (choose_subtree entry node)
