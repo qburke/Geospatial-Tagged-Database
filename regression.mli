@@ -26,6 +26,6 @@ val add_random : int -> int -> Rtree.t -> unit
     around point [mid]. *)
 val add_cluster : int -> int -> int -> Rtree.t -> unit
 
-(** [execute test desc] executes the [test] print out test 
-    [desc] and time elapsed *)
-val execute : (unit->unit) -> string -> unit
+(** [execute test desc] executes the [test] and then prints out test 
+    description [desc] as well as time elapsed. *)
+val execute : (unit -> unit) -> string -> unit
