@@ -69,7 +69,6 @@ let remove db e : unit =
      Hashtbl.remove db.elements (Entry.id e);
      Rtree.remove e db.rTree;)
 
-
 let tag_search db objects tags =
   let ri_lookup tag elem =
     let tag_set = Hashtbl.find db.tag_index tag in
@@ -79,9 +78,13 @@ let tag_search db objects tags =
       (fun acc tag-> if ri_lookup tag elem then acc else false) true tags in
   List.filter filter_func objects
 
+let string_of_element v e =
+  Entry.to_string v e
+
 let from_json f name =
   let db = create_db name in
   f
   |> Yojson.Basic.from_file 
   |> Yojson.Basic.Util.to_list
-  |> List.iter (fun j -> add db (Entry.from_json j))
+  |> List.iter (fun j -> add db (Entry.from_json j));
+  db

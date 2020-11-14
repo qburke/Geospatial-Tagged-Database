@@ -52,3 +52,11 @@ val remove : database -> element -> unit
 (** [tag_search db objects tags] takes a collection of objects of type ['a element list] 
     and returns a list of elements which match all of the tags in the [string list] *)
 val tag_search : database -> element list -> string list -> element list
+
+(** [string_of_element e] returns the string representation of [e]. Prints
+    verbose data if [v] is true *)
+val string_of_element : bool -> element -> string
+
+(** [from_json f name] creates a database with name [name] from the database
+    stored in [f] *)
+val from_json : string -> string -> database
