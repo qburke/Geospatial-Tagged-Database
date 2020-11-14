@@ -36,4 +36,4 @@ docs-private: build
 
 clean:
 	ocamlbuild -clean
-	rm -rf doc.public doc.private
+	rm -rf ms2.zip doc.public doc.private

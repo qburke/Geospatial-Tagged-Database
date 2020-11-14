@@ -185,7 +185,7 @@ let () = assert_find
     (Entry.manual "100" (100., 100.) [] `Null)false int_test_tree
 
 (* Stress testing for 1 million elements add and 100k elements search/delete *)
-let elements_count = 1000000
+let elements_count = 100000
 
 (* [add] regression increasing order *)
 let int_test_tree = empty ()
