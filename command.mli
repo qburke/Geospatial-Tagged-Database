@@ -14,13 +14,13 @@ type search_parameter = string list
 type command =
   | Help of object_phrase
   | Initialize
-  | Load of object_phrase
-  | Query 
-  | List
+  | Load 
+  | Query of object_phrase
+  | List of object_phrase
   | Tags
   | Add
   | Delete 
-  | Write of object_phrase
+  | Write 
   | Quit
 
 (** Raised when an empty command is parsed *)

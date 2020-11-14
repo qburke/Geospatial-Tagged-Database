@@ -75,5 +75,5 @@ let to_json ent = ent.data
 let to_string v ent =
   "id: " ^ ent.id ^ "\n" ^
   "mbr: " ^ Point.to_string ent.loc ^ "\n" ^
-  "tags: " ^ List.fold_left (fun tag acc -> acc ^ tag ^ ", " ) "" ent.tags ^ "\n" ^
+  "tags: " ^ List.fold_left (fun tag acc -> acc ^ ", " ^ tag ) "" ent.tags ^ "\n" ^
   if v then Yojson.Basic.pretty_to_string ent.data else ""

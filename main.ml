@@ -13,6 +13,21 @@ let parse_init () st =
      | s::[] -> s
      | _ -> raise InvalidInput)
 
+let parse_load () st =
+  let open State in
+  if is_initialized st then raise DatabaseAlreadyExists else
+    let parse_filename =
+      print_endline "Enter filename. Spaces are prohibited";
+      match read_line () |> split_str with
+      | x::[] -> x 
+      | _ -> raise InvalidInput in
+    let parse_name =
+      print_endline "Enter database name. Spaces are prohibited";
+      match read_line () |> split_str with
+      | x::[] -> x
+      | _ -> raise InvalidInput in
+    (parse_filename, parse_name)
+ 
 let parse_add () st =
   let open State in
   if is_initialized st |> not then raise NoDatabaseInitialized else
@@ -53,12 +68,11 @@ let parse_query () st =
   | xs -> xs     
 
 let print_elems () es =
-  print_endline "ID | Location | Tags";
   print_endline "-----------------------";
   let rec aux = function
     | [] -> ignore 0;
-    | (name,(x,y),tags)::xs ->
-      Printf.printf "%s | %f, %f | %s\n" name x y (String.concat " " tags);
+    | x::xs ->
+      Printf.printf "%s\n" x;
       Printf.printf "-----------------------\n";
       aux xs; in
   aux es
@@ -96,20 +110,30 @@ let open_interface =
           let init = initialize st name in 
           Log.info "Initialized DB: %s" name;
           loop init
-        | Load filename -> failwith "unimplemented"
-        | List -> get_elems st |> print_elems (); loop st
+        | Load ->
+          let (f,n) = parse_load () st in
+          load_db st f n |> loop
+        | List xs ->
+          let v =  match xs with
+            | ["verbose"] -> true
+            | [] -> false 
+            | _ -> raise InvalidInput in
+          get_elems st v |> print_elems (); loop st
         | Tags -> get_tags st |> print_tags (); loop st
-        | Query ->
+        | Query xs ->
+          let v =  match xs with
+            | ["verbose"] -> true
+            | [] -> false 
+            | _ -> raise InvalidInput in
           let queries = parse_query () st in
-          time (queries |> query_elems st |> print_elems ()) ("Query complete in"); 
+          time (queries |> query_elems st v |> print_elems ()) ("Query complete in"); 
           loop st
         | Add ->
-          let (name,tags,location) = parse_add () st in
-          time (add st id tags location `Null) ("Added item "^name);
+          let (id,tags,location) = parse_add () st in
+          time (add st id tags location `Null) ("Added item "^id);
           loop st
         | Delete -> parse_delete () st |> delete_elem st; loop st
-        | Write filename -> failwith "unimplemented"
-
+        | Write -> failwith "unimplemented"
         | Quit -> print_endline "Goodbye"; exit 0;
         | Help cmd ->
           help cmd |> print_endline;
@@ -124,15 +148,28 @@ let open_interface =
     with
     | DatabaseAlreadyExists ->
       (Log.error "Cannot initialize multiple databases\nPress enter to continue...";
-      match read_line () with _ -> print_string "";
-        loop st;)
+       match read_line () with _ -> print_string "";
+         loop st;)
     | NoDatabaseInitialized ->
       (Log.error "No database selected\nPress enter to continue...";
        match read_line () with _ -> print_string "";
          loop st;)
     | InvalidInput ->
-      Log.error "Invalid Input\nPress enter to continue...";
-      loop st;                                                     
+      (Log.error "Invalid Input\nPress enter to continue...";
+       match read_line () with _ -> print_string "";
+         loop st;)
+    | InvalidFileName ->
+      (Log.error "Invalid Input File\nPress enter to continue...";
+       match read_line () with _ -> print_string "";
+         loop st;)
+    | TagNotFound ->
+      (Log.error "Tag does not exist in database\nPress enter to continue...";
+       match read_line () with _ -> print_string "";
+         loop st;)
+    | DataNotFound ->
+      (Log.error "Data does not exist in database\nPress enter to continue...";
+       match read_line () with _ -> print_string "";
+         loop st;)
   in
   init_state |> loop
 

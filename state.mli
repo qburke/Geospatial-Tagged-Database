@@ -17,6 +17,9 @@ exception NoDatabaseInitialized
 
 exception DataNotFound
 
+exception TagNotFound
+
+exception InvalidFileName
 (**  [initialize name dummy] returns a state containing an initialized
      database *)
 val initialize : t -> string -> t
@@ -29,13 +32,13 @@ val init_state : t
     adds it to [st]. Raises an exception if [st] is uninitialized. *)
 val add : t -> string -> string list -> Point.t -> Yojson.Basic.t -> unit
 
-(** [get_elems st] returns a list of tuples of the components of the
-    elements in [st]. Raises an exception if [st] is unitialized *)
-val get_elems : t -> (string * Point.t * string list) list
+(** [get_elems st v] returns a list of the string representation of the
+    elements in the database. Prints out verbose data if [v] is true *)
+val get_elems : t -> bool -> string list
 
 (** [query_elems  st tags] returns a tuple of element components that 
-match the given list of [tags] *)
-val query_elems : t -> string list -> (id * Point.t * string list) list
+    match the given list of [tags] *)
+val query_elems : t -> bool ->  string list -> string list
 
 (** [delete_elem st n] deletes an element with name [n] from [st].
     Raises an exception if the element is not found in the [st] or
@@ -44,7 +47,11 @@ val delete_elem : t -> string -> unit
 
 (** [get_tags st] returns a list of tags in [st].
     Raises an exception if [st] is unitialized *)
-val get_tags : 'a t -> string list
+val get_tags : t -> string list
+
+(** [load_db st f name] returns a new Database db created from
+    [f]. Raises an exception if [f] is not a valid json file. *)
+val load_db : t -> string -> string -> t
 
 (** [help param] returns a string corresponding to a help phrase
       for the given object phrase *)
