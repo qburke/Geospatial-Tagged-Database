@@ -155,10 +155,7 @@ let open_interface =
           write_db st format filename; loop st
         | Quit -> print_endline "Goodbye"; exit 0;
         | Help cmd ->
-          help cmd |> print_endline;
-          print_endline "Press enter to continue...";
-          match read_line () with _ -> print_string "";
-            loop st;
+          help cmd |> print_endline; loop st;
       with
       | Empty | Malformed ->
         Log.error "Invalid command\nPress enter to continue...";
