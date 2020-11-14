@@ -55,7 +55,7 @@ let manual id p tags data =
     tags = tags;
     data = `Assoc (
         ("id", `String id) ::
-        ("mbr", Point.to_json p) ::
+        ("location", Point.to_json p) ::
         ("tags", `List (List.map (fun s -> `String s) tags)) ::
         addtl_data);
   }

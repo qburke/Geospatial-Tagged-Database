@@ -18,6 +18,28 @@
         "y"
       ]
     },
+    "entry": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "location": {
+          "$ref": "#/definitions/point"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "location",
+        "tags"
+      ]
+    },
     "box": {
       "type": "object",
       "properties": {
@@ -35,7 +57,7 @@
                 "$ref": "#/definitions/box"
               },
               {
-                "$ref": "#/definitions/point"
+                "$ref": "#/definitions/entry"
               }
             ]
           },

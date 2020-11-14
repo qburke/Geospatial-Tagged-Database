@@ -1,15 +1,17 @@
-{
-  "id": "Ithaca",
-  "location": {
-    "x": 42.44,
-    "y": -76.50
-  },
-  "tags": [
-    "Cornell",
-    "City",
-    "University",
-    "College"
-  ],
-  "weather": "cold, rainy",
-  "population": 31000
-}
+[
+  {
+    "id": "Ithaca",
+    "location": {
+      "x": 42.44,
+      "y": -76.50
+    },
+    "tags": [
+      "Cornell",
+      "City",
+      "University",
+      "College"
+    ],
+    "weather": "cold, rainy",
+    "population": 31000
+  }
+]
