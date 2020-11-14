@@ -5,13 +5,13 @@ type search_parameter = string list
 type command =
   | Help of object_phrase
   | Initialize
-  | Load of object_phrase
-  | Query 
-  | List
+  | Load
+  | Query of object_phrase
+  | List of object_phrase
   | Tags
   | Add
   | Delete 
-  | Write of object_phrase
+  | Write 
   | Quit
 
 exception Empty
@@ -24,22 +24,16 @@ let parse str =
       | [] | [""] -> raise Empty
       | "help"::xs -> Help xs
       | "initialize"::[] -> Initialize
-      | "initialize"::_ -> raise Malformed
-      | "load"::[] -> raise Malformed
-      | "load"::xs -> Load xs
-      | "query"::[] -> Query
-      | "query"::_ -> raise Malformed
+      | "load"::[] -> Load
+      | "query"::xs -> Query xs
       | "add"::[] -> Add
-      | "add"::_ -> raise Malformed
-      | "list"::[] -> List
-      | "list"::_ -> raise Malformed
+      | "list"::xs -> List xs
       | "tags"::[] -> Tags
-      | "tags"::_ -> raise Malformed
       | "delete"::[] -> Delete
-      | "delete"::_ -> raise Malformed
-      | "write"::xs -> Write xs
+      | "write"::[] -> Write
       | "quit"::[] -> Quit
-      | "quit"::_ | _ -> raise Malformed in
+      | "initialize"::_ -> raise Malformed
+      | _ -> raise Malformed in
     String.trim str |>
     String.split_on_char ' ' |>
     List.filter (fun x -> x = "" |> not) |>
