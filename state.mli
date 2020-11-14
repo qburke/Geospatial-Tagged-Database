@@ -36,8 +36,8 @@ val add : t -> string -> string list -> Point.t -> Yojson.Basic.t -> unit
     elements in the database. Prints out verbose data if [v] is true *)
 val get_elems : t -> bool -> string list
 
-(** [query_elems  st tags] returns a tuple of element components that 
-    match the given list of [tags] *)
+(** [query_elems st v tags] returns a string list of elements that
+    match the given list of tags *)
 val query_elems : t -> bool ->  string list -> string list
 
 (** [delete_elem st n] deletes an element with name [n] from [st].
