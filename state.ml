@@ -66,6 +66,17 @@ let load_db st f name=
     try Database (Db.from_json f name) with
     | _ -> raise InvalidFileName
 
+let write_db st fmt f =
+  match st with
+  | Empty -> raise NoDatabaseInitialized
+  | Database db -> 
+    begin 
+      match fmt with 
+      | "rtree" -> Db.to_rtree_json db f
+      | "list" -> Db.to_list_json db f
+      | s -> raise (Invalid_argument s)
+    end
+
 let help param =
   let initialize = "[initialize] creates a new database\n" in
   let load = "[load] loads from a json file\n" in

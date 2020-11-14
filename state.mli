@@ -53,6 +53,13 @@ val get_tags : t -> string list
     [f]. Raises an exception if [f] is not a valid json file. *)
 val load_db : t -> string -> string -> t
 
+(** [write_db st format f] writes the contents of db created from
+    [f]. The [format] of the json file can be either a flattened [list]
+    or an [rtree]. 
+    Raises an exception if no database is initialized in [st] or
+    if [f] is not a valid json filename. *)
+val write_db : t -> string -> string -> unit
+
 (** [help param] returns a string corresponding to a help phrase
       for the given object phrase *)
 val help : object_phrase -> string

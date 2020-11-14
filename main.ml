@@ -67,6 +67,21 @@ let parse_query () st =
   | [] | [""] -> raise InvalidInput
   | xs -> xs     
 
+let parse_write () st =
+  let open State in
+  if is_initialized st |> not then raise NoDatabaseInitialized else
+    let parse_filename = 
+     print_endline "Enter file name to be exported to";
+     match read_line () |> split_str with
+     | e::[] -> e
+     | _ -> raise InvalidInput in 
+    let parse_type = 
+      print_endline "Choose format for export [list | rtree]";
+      match read_line () |> split_str with 
+      | x::[] -> if x="list" || x="rtree" then x else raise InvalidInput
+      | _ -> raise InvalidInput in 
+    parse_type, parse_filename
+
 let print_elems () es =
   print_endline "-----------------------";
   let rec aux = function
@@ -133,7 +148,11 @@ let open_interface =
           time (add st id tags location `Null) ("Added item "^id);
           loop st
         | Delete -> parse_delete () st |> delete_elem st; loop st
-        | Write -> failwith "unimplemented"
+        | Write -> 
+          let keyword = parse_write () st in
+          let format = fst keyword in 
+          let filename = snd keyword in 
+          write_db st format filename; loop st
         | Quit -> print_endline "Goodbye"; exit 0;
         | Help cmd ->
           help cmd |> print_endline;
