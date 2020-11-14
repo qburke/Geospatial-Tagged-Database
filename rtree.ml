@@ -113,8 +113,9 @@ let node_with_children n c_lst =
   node.children <- `Node c_lst;
   node
 
-(* [handle_overflow n] splits [n] into two bounding boxes n and n', updating the
-   children of n and its MBR, and adding n' to their shared parent.*)
+(* [handle_overflow n] splits [n] into two bounding boxes n and n', 
+   updating the children of n and its MBR, and adding n' to their
+    shared parent.*)
 let rec handle_overflow (n : t) : unit =
   (* split the children of n to be n and n'*)
   let u, u' = n |> children |> split in
@@ -149,13 +150,15 @@ let rec handle_overflow (n : t) : unit =
     if w |> children |> List.length > max_boxes then
       handle_overflow w
 
-(* [choose_subtree e n] is the child of [n] that requires the minimum increase
-   in perimeter to include [e]. The minimum increase in area is the tie-breaker.*)
+(* [choose_subtree e n] is the child of [n] that 
+   requires the minimum increase in perimeter to include [e]. 
+   The minimum increase in area is the tie-breaker.*)
 let choose_subtree (e : t) (n : t) : t =
   let enlarge_child c =
     Rect.(c.mbr |> enlargement_rect e.mbr |> area, c)
   in let choices = List.map (enlarge_child) (children n)
-  in let compare_choices c1 c2 = fst c1 -. fst c2 |> ( *. ) 10.0 |> Float.to_int
+  in let compare_choices c1 c2 = fst c1 -. fst c2 |> ( *. ) 10.0 
+                                 |> Float.to_int
   in let choices = List.sort (compare_choices) choices
   in choices |> List.hd |> snd (* TODO tie breakers *)
 
@@ -196,7 +199,8 @@ let rec find_aux ent = function
   | node :: t -> begin
       match node.children with
       | `Node lst -> find_aux ent (choose_container (Entry.loc ent) node)
-      | `Entry e -> if (node.mbr = (Entry.mbr ent) && Entry.id ent = Entry.id e) then (* TODO change / cleanup*)
+      | `Entry e -> if (node.mbr = (Entry.mbr ent) && Entry.id ent = Entry.id e) 
+        then (* TODO change / cleanup*)
           true, node
         else find_aux ent t
     end
@@ -241,10 +245,6 @@ let rec length node =
   match node.children with
   | `Node lst -> 1 + List.fold_right (fun el t -> max (length el) t) lst 0
   | `Entry e -> 1
-
-let union t1 t2 = empty ()
-
-let inter t1 t2 = empty ()
 
 (* FIXME *)
 let rec json_of_t t = Yojson.Basic.(

@@ -37,7 +37,6 @@ let add_random range n t = add_rand 0 range n t
 
 let add_cluster mid rad n t = add_rand (mid - rad) (rad * 2) n t
 
-
 module Log = Dolog.Log
 
 let enable_log_info =
@@ -55,4 +54,3 @@ let execute (u:unit->unit) (m:string) : unit =
     let elapsed = (e -. s)*.(10.**6.) in
     Log.info "%s in %.2f us" m elapsed
   end
-
