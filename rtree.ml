@@ -254,7 +254,7 @@ let rec json_of_t t = Yojson.Basic.(
       ("children", 
        match t.children with
        | `Node lst -> `List (List.map json_of_t lst)
-       | `Entry e -> `Null
+       | `Entry e -> Entry.to_json e
       )
     ]
   )
