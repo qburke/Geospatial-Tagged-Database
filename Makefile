@@ -19,7 +19,7 @@ interface:
 	$(OCAMLBUILD) $(MAIN) && ./$(MAIN)
 	
 zip:
-	zip ms2.zip *.ml* *.json _tags Makefile README.md
+	zip ms2.zip *.ml* *.json _tags Makefile README.md INSTALL.md
 
 docs: docs-public docs-private
 	
