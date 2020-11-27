@@ -112,7 +112,7 @@ let time (u:unit) (m:string) : unit =
   Log.info "%s in %.2f us" m elapsed
 
 (** [open_interface] starts the cli *)
-let open_interface =
+let open_interface () =
   Log.set_log_level Log.INFO;
   Log.color_on ();
   Log.set_output stdout;
@@ -193,4 +193,8 @@ let open_interface =
 
 let main () =
   (* ANSITerminal.(); unused import? *)
-  open_interface
+  match Array.length Sys.argv with
+  | 1 -> open_interface ()
+  | _ -> print_string "hello"
+
+let _ = main ()

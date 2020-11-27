@@ -18,6 +18,9 @@ test:
 interface: build
 	./_build/default/bin/main.exe
 
+server: build
+	./_build/default/bin/main.exe server
+
 zip:
 	zip -r ms3.zip bin lib test _tags .merlin .ocamlinit dune Makefile INSTALL.md README.md
 
@@ -29,10 +32,7 @@ docs-public: build
 		-html -stars -d doc.public $(MLIS)
 
 docs-private: build
-	mkdir -p doc.private
-	ocamlfind ocamldoc -I _build -package yojson,ANSITerminal,dolog \
-		-html -stars -d doc.private \
-		-inv-merge-ml-mli -m A $(MLIS) $(MLS)
+	dune build @doc-private
 
 clean:
 	dune clean
