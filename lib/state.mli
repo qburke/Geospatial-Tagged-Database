@@ -20,8 +20,8 @@ exception DataNotFound
 exception TagNotFound
 
 exception InvalidFileName
-(**  [initialize name dummy] returns a state containing an initialized
-     database *)
+
+(**  [initialize name dummy] is a state containing an initialized database *)
 val initialize : t -> string -> t
 
 (** [init_state] is the initial state of the interface.

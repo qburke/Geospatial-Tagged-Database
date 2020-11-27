@@ -73,7 +73,7 @@ let to_rtree_json db f : unit =
   db.rTree |> Rtree.to_json |> Yojson.Basic.to_file f
 
 let to_list_json db f : unit =
-  let entries = Hashtbl.fold (fun k v acc -> v :: acc) db.elements [] in
+  let entries = Hashtbl.fold (fun _ v acc -> v :: acc) db.elements [] in
   Yojson.Basic.(
     to_file f (`List (List.map Entry.to_json entries))
   ) 

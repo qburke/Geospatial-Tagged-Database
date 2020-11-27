@@ -8,7 +8,7 @@ let rec ints_from_to lb ub =
 let entries_of_int_range lst =
   List.map (fun i -> ((float_of_int i, float_of_int i), i)) lst
 
-let rec floats_from_to lb ub =
+let floats_from_to lb ub =
   let rec floats_from_to_aux lb ub acc =
     match lb = ub with
     | true -> acc
@@ -26,7 +26,7 @@ let add_from_to lb ub t =
     [n] random entries between [base] and [base] + [range]*)
 let add_rand base range n t =
   Random.self_init ();
-  for i = 1 to n + 1 do
+  for _ = 1 to n + 1 do
     let x_int = base + (Random.int range) in
     let x_float = float_of_int x_int in
     let x_str = string_of_int x_int in

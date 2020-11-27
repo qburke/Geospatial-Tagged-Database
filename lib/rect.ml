@@ -1,5 +1,3 @@
-open Point
-
 (** AF: (p1, p2) is the rectangle with p1 as the bottom left corner
     		and p2 as the upper right corner. *)
 type t = Point.t * Point.t

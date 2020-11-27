@@ -1,3 +1,4 @@
+open Lib
 open OUnit2
 open Regression
 open Database_test
@@ -38,8 +39,8 @@ let add_test
     (name : string)
     (entries : Entry.t list)
     (tree : t) : test list =
-  List.mapi
-    (fun i x ->
+  List.map
+    (fun x ->
        name >::
        (fun _ -> begin
             add x tree;
@@ -154,7 +155,7 @@ let suite =
 let _ = run_test_tt_main suite
 
 let assert_find x expected_result tree =
-  let found, entry = find x tree in
+  let found, _ = find x tree in
   assert(found = expected_result)
 
 let number_entries = 101

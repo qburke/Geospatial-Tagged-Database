@@ -1,4 +1,3 @@
-open Point
 open Rect
 
 let max_boxes = 8
@@ -42,11 +41,6 @@ let children (n : t) : t list =
   match n.children with
   | `Node lst -> lst
   | `Entry _ -> failwith "Entry does not have children"
-
-let value (n : t) : Entry.t =
-  match n.children with
-  | `Node _ -> failwith "Node does not have a value"
-  | `Entry e -> e
 
 let node_append box n =
   match n.children with 
@@ -177,7 +171,7 @@ let rec add_aux entry node =
   | `Node [] ->
     let entry = {entry with parent = Some node }
     in node_append entry node;
-  | `Node lst -> begin
+  | `Node _ -> begin
       node.mbr <- enlargement_rect node.mbr entry.mbr;
       add_aux entry (choose_subtree entry node)
     end
@@ -198,7 +192,7 @@ let choose_container p node =
 let rec find_aux ent = function
   | node :: t -> begin
       match node.children with
-      | `Node lst -> find_aux ent (choose_container (Entry.loc ent) node)
+      | `Node _ -> find_aux ent (choose_container (Entry.loc ent) node)
       | `Entry e -> if (node.mbr = (Entry.mbr ent) && Entry.id ent = Entry.id e) 
         then (* TODO change / cleanup*)
           true, node
@@ -214,11 +208,11 @@ let find e tree =
     children = `Entry e
   }
   in try find_aux e [tree] with
-  | exc -> false, entry
+  | _ -> false, entry
 
 let rec propagate_mbr node = 
   let parent_node = node.parent in
-  (** TODO, reevaluate when supporting collapsing *)
+  (* TODO, reevaluate when supporting collapsing *)
   if List.length (mbr_of_children node) = 0 then ()
   else node.mbr <- Rect.mbr_of_list (mbr_of_children node);
   match parent_node with
@@ -244,27 +238,26 @@ let rec to_list node =
 let rec length node =
   match node.children with
   | `Node lst -> 1 + List.fold_right (fun el t -> max (length el) t) lst 0
-  | `Entry e -> 1
+  | `Entry _ -> 1
 
 (* FIXME *)
-let rec json_of_t t = Yojson.Basic.(
-    `Assoc [
-      ("bottom-left", (t.mbr |> Rect.ll |> Point.to_json));
-      ("upper-right", (t.mbr |> Rect.ur |> Point.to_json));
-      ("children", 
-       match t.children with
-       | `Node lst -> `List (List.map json_of_t lst)
-       | `Entry e -> Entry.to_json e
-      )
-    ]
-  )
+let rec json_of_t t =
+  `Assoc [
+    ("bottom-left", (t.mbr |> Rect.ll |> Point.to_json));
+    ("upper-right", (t.mbr |> Rect.ur |> Point.to_json));
+    ("children", 
+     match t.children with
+     | `Node lst -> `List (List.map json_of_t lst)
+     | `Entry e -> Entry.to_json e
+    )
+  ]
 
-let to_json tree = Yojson.Basic.(`Assoc [("rtree", json_of_t tree)])
+let to_json tree = `Assoc [("rtree", json_of_t tree)]
 
 let rec mem_aux x = function
   | node :: t -> begin
       match node.children with
-      | `Node lst -> mem_aux x (choose_container (Entry.loc x) node)
+      | `Node _ -> mem_aux x (choose_container (Entry.loc x) node)
       | `Entry e -> (Entry.id x = Entry.id e) || mem_aux x t
     end
   | [] -> false

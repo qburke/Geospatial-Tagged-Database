@@ -1,3 +1,5 @@
+open Lib
+
 val rect_tests : OUnit2.test list 
 
 (** [enlargement_rect_test name r1 r2 expected_output] constructs an OUnit

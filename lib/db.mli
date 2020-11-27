@@ -40,6 +40,7 @@ val list_of_reverse_index : database -> string list
 val list_of_tag_collection : database -> string -> element list
 
 val list_of_elements : database -> element list
+
 (** [add db e]  adds the data of type ['a] of an item of type ['a element] to
     the [reverse_index] of [db] for each tag_collection corresponding to the tags of
     [e]. If there is a tag not present in [reverse_index] then a new tag collection is

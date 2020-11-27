@@ -3,23 +3,23 @@ OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
 TEST=test.byte
-MAIN=main.byte
+MAIN=bin/main.exe
 OCAMLBUILD=ocamlbuild -use-ocamlfind
 
 default: build
-	utop
+	dune utop lib
 
 build:
-	$(OCAMLBUILD) $(OBJECTS)
+	dune build $(MAIN)
 
 test:
-	$(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST)
+	dune runtest test
 
-interface:
-	$(OCAMLBUILD) $(MAIN) && ./$(MAIN)
-	
+interface: build
+	./_build/default/bin/main.exe
+
 zip:
-	zip ms2.zip *.ml* *.json _tags Makefile README.md
+	zip -r ms3.zip bin lib test _tags .merlin .ocamlinit dune Makefile INSTALL.md README.md
 
 docs: docs-public docs-private
 	
@@ -35,5 +35,5 @@ docs-private: build
 		-inv-merge-ml-mli -m A $(MLIS) $(MLS)
 
 clean:
-	ocamlbuild -clean
+	dune clean
 	rm -rf doc.public doc.private

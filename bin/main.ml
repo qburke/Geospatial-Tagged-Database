@@ -1,3 +1,5 @@
+open Lib
+
 exception InvalidInput
 module Log = Dolog.Log
 
@@ -27,7 +29,7 @@ let parse_load () st =
       | x::[] -> x
       | _ -> raise InvalidInput in
     (parse_filename, parse_name)
- 
+
 let parse_add () st =
   let open State in
   if is_initialized st |> not then raise NoDatabaseInitialized else
@@ -71,10 +73,10 @@ let parse_write () st =
   let open State in
   if is_initialized st |> not then raise NoDatabaseInitialized else
     let parse_filename = 
-     print_endline "Enter file name to be exported to";
-     match read_line () |> split_str with
-     | e::[] -> e
-     | _ -> raise InvalidInput in 
+      print_endline "Enter file name to be exported to";
+      match read_line () |> split_str with
+      | e::[] -> e
+      | _ -> raise InvalidInput in 
     let parse_type = 
       print_endline "Choose format for export [list | rtree]";
       match read_line () |> split_str with 
@@ -190,5 +192,5 @@ let open_interface =
   init_state |> loop
 
 let main () =
-  ANSITerminal.();
+  (* ANSITerminal.(); unused import? *)
   open_interface

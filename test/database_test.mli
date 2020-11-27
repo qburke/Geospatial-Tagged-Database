@@ -1,3 +1,5 @@
+open Lib
+
 (** [list_of_tags_test name db expected_output] constructs an OUnit
     test named [name] that asserts the quality of [expected_output]
     with [list_of_reverse_index db]. *)

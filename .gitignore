@@ -18,3 +18,4 @@ _build
 !entry_schema.json
 !test_entry.json
 results
+**/.merlin
