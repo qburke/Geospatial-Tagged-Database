@@ -36,4 +36,4 @@ docs-private: build
 
 clean:
 	dune clean
-	rm -rf doc.public doc.private
+	rm -rf doc.public
