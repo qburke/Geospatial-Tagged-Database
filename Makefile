@@ -16,10 +16,10 @@ test:
 	dune runtest test
 
 interface: build
-	./_build/default/bin/main.exe
+	./_build/default/bin/main.exe cli
 
 server: build
-	./_build/default/bin/main.exe server
+	./_build/default/bin/main.exe
 
 zip:
 	zip -r ms3.zip bin lib test _tags .merlin .ocamlinit dune Makefile INSTALL.md README.md

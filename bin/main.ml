@@ -194,7 +194,7 @@ let open_interface () =
 let main () =
   (* ANSITerminal.(); unused import? *)
   match Array.length Sys.argv with
-  | 1 -> open_interface ()
-  | _ -> print_string "hello"
+  | 1 -> Server.start ()
+  | _ -> open_interface ()
 
 let _ = main ()
