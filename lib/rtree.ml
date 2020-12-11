@@ -42,6 +42,34 @@ let children (n : t) : t list =
   | `Node lst -> lst
   | `Entry _ -> failwith "Entry does not have children"
 
+let value (n : t) : Entry.t =
+  match n.children with
+  | `Node _ -> failwith "Node does not have a value"
+  | `Entry e -> e
+
+(* TODO remove;  this is for remove collapsing debugging
+    removed_nodes -- number of nodes has been removed
+    added_nodes   -- number of nodes has been added *)
+let removed_nodes = ref 0
+let added_nodes   = ref 0
+
+(* Print added_nodes, removed_nodes *)
+let print_counters uniq_nodes = Printf.printf 
+    "\nadded: %d, removed: %d, size: %d\n" !added_nodes !removed_nodes uniq_nodes
+
+let reset_counters() = removed_nodes := 0; added_nodes := 0
+
+let node_append box n =
+  added_nodes := !added_nodes + 1;          (* TODO Remove *)
+  match n.children with 
+  | `Node lst -> n.children <- `Node (box :: lst)
+  | `Entry _ -> failwith "Cannot append to an Entry"
+
+(**[node_remove node entry] removes an [entry] from a [node]. *)
+let node_remove node entry =
+  removed_nodes := !removed_nodes + 1;          (* TODO Remove *)
+  List.filter (fun el -> el != entry) (children node)
+
 let node_append box n =
   match n.children with 
   | `Node lst -> n.children <- `Node (box :: lst)
@@ -210,24 +238,33 @@ let find e tree =
   in try find_aux e [tree] with
   | _ -> false, entry
 
-let rec propagate_mbr node = 
-  let parent_node = node.parent in
-  (* TODO, reevaluate when supporting collapsing *)
-  if List.length (mbr_of_children node) = 0 then ()
-  else node.mbr <- Rect.mbr_of_list (mbr_of_children node);
-  match parent_node with
+let rec propagate_mbr node =
+  match node with
   | None -> ()
-  | Some p -> propagate_mbr p
+  | Some me ->
+    me.mbr <- Rect.mbr_of_list (mbr_of_children me);
+    propagate_mbr me.parent
 
-(* remove does not currently support collapsing--removing level case *)
-let remove e tree = 
-  let found, node = find e tree in 
-  match found with 
-  | true -> begin
-      let parent_node = parent node in
-      parent_node.children <- `Node (node_remove parent_node node);
-      propagate_mbr parent_node;
-    end
+let rec remove_collapse node child =
+  match node with
+  | None -> ()
+  | Some me ->
+    me.children <- `Node (node_remove me child);
+    if List.length (children me) = 0 then
+      begin
+        me.mbr <- Rect.empty;        (* only necessary for root, but it does not hurt *)
+        remove_collapse me.parent me;
+      end
+    else
+      begin
+        me.mbr <- Rect.mbr_of_list (mbr_of_children me);
+        propagate_mbr me.parent;
+      end
+
+let remove e tree =
+  let found, node = find e tree in
+  match found with
+  | true -> remove_collapse node.parent node
   | false -> ()
 
 let rec to_list node =
