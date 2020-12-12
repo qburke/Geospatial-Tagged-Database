@@ -31,15 +31,10 @@ val to_list: t -> Entry.t list
 (** [length r] is the tree length *)
 val length: t -> int
 
-(** [union r1 r2] returns the set union of [r1] and [r2].
-    [r1] contains less than or equal to elements than [r2].
-    [r1] and [r2] are not allowed to contain duplicates *)
-(* val union : 'a t -> 'a t -> 'a t *)
-
-(** [inter r1 r2] returns the set intersection of [r1] and [r2].
-    [r1] contains less than or equal to elements than [r2].	
-    [r1] and [r2] are not allowed to contain duplicates *)
-(* val inter : 'a t -> 'a t -> 'a t *)
-
 (** [to_json t] is the JSON representation of [t]. See R Tree schema. *)
 val to_json : t -> Yojson.Basic.t
+
+(** TODO remove, this is for debugging the remove collapsing *)
+val print_counters : int -> unit
+
+val reset_counters : unit -> unit

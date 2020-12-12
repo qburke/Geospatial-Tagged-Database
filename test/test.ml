@@ -218,8 +218,12 @@ let () = Printf.printf "Tree with %d element has tree length of = %d\n"
 
 let elements_count = 100000
 
+let () = reset_counters()
+
 let int_test_tree = empty ()
 let () = add_from_to 0 elements_count int_test_tree
+
+let () = print_counters elements_count
 
 (* [find] regression *)
 let lst = to_list int_test_tree
@@ -232,5 +236,8 @@ let () = execute (fun () -> List.iter (fun e ->
     remove e int_test_tree) lst)
     (Printf.sprintf "test removing %d cluster elements" elements_count)
 
+let () = print_counters elements_count
 let lst = to_list int_test_tree
+
 let () = assert(List.length lst = 0)
+let () = assert(int_test_tree = empty ())
