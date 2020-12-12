@@ -13,7 +13,7 @@ build:
 	dune build $(MAIN)
 
 test:
-	dune runtest test
+	dune exec test/test.exe
 
 interface: build
 	./_build/default/bin/main.exe cli
