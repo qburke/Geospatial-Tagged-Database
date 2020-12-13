@@ -133,23 +133,23 @@ let rtree_tests = List.flatten [
     ]
   ]
 
-let json = Yojson.Basic.from_file "test_entry.json"
-let ithaca_entry = Entry.from_json json
+(*let json = Yojson.Basic.from_file "test_entry.json"
+  let ithaca_entry = Entry.from_json json
 
-let entry_tests = [
+  let entry_tests = [
   "id is Ithaca" >:: (fun _ -> assert_equal "Ithaca" (Entry.id ithaca_entry));
   "location is Ithaca" >:: (fun _ -> assert_equal (42.44, -76.50)
                                (Entry.loc ithaca_entry));
   "tags have Cornell" >:: (fun _ -> 
       assert_equal true (ithaca_entry |> Entry.tags |> List.mem "Cornell"));
-]
-
+  ]
+*)
 let suite =
   "test suite for final_project"  >::: List.flatten [
     rect_tests;
     rtree_tests;
     db_tests;
-    entry_tests;
+    (*entry_tests;*)
   ]
 
 let _ = run_test_tt_main suite
@@ -218,8 +218,12 @@ let () = Printf.printf "Tree with %d element has tree length of = %d\n"
 
 let elements_count = 100000
 
+let () = reset_counters()
+
 let int_test_tree = empty ()
 let () = add_from_to 0 elements_count int_test_tree
+
+let () = print_counters elements_count
 
 (* [find] regression *)
 let lst = to_list int_test_tree
@@ -232,5 +236,8 @@ let () = execute (fun () -> List.iter (fun e ->
     remove e int_test_tree) lst)
     (Printf.sprintf "test removing %d cluster elements" elements_count)
 
+let () = print_counters elements_count
 let lst = to_list int_test_tree
+
 let () = assert(List.length lst = 0)
+let () = assert(int_test_tree = empty ())

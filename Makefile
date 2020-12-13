@@ -2,7 +2,7 @@ MODULES=rtree point rect db command state entry regression database_test rect_te
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
-TEST=test.byte
+TEST=test/test.exe
 MAIN=bin/main.exe
 OCAMLBUILD=ocamlbuild -use-ocamlfind
 
@@ -12,14 +12,17 @@ default: build
 build:
 	dune build $(MAIN)
 
-test:
-	dune runtest test
+buildtest:
+	dune build $(TEST)
+
+test: buildtest
+	./_build/default/test/test.exe
 
 interface: build
-	./_build/default/bin/main.exe
+	./_build/default/bin/main.exe cli
 
 server: build
-	./_build/default/bin/main.exe server
+	./_build/default/bin/main.exe
 
 zip:
 	zip -r ms3.zip bin lib test _tags .merlin .ocamlinit dune Makefile INSTALL.md README.md
