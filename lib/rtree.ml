@@ -70,15 +70,6 @@ let node_remove node entry =
   removed_nodes := !removed_nodes + 1;          (* TODO Remove *)
   List.filter (fun el -> el != entry) (children node)
 
-let node_append box n =
-  match n.children with 
-  | `Node lst -> n.children <- `Node (box :: lst)
-  | `Entry _ -> failwith "Cannot append to an Entry"
-
-(**[node_remove node entry] removes an [entry] from a [node]. *)
-let node_remove node entry =
-  List.filter (fun el -> el != entry) (children node)
-
 let mbr_of_children (n : t) : Rect.t list =
   List.map (fun c -> c.mbr) (children n)
 
@@ -131,6 +122,7 @@ let node_with_children n c_lst =
     mbr = Rect.empty;
     children = `Node c_lst;
   } in
+  added_nodes := !added_nodes + 1; (* TODO Remove *)
   List.iter (fun c -> c.parent <- Some node) c_lst;
   node.children <- `Node c_lst;
   node
