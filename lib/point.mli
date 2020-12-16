@@ -9,3 +9,6 @@ val to_json : t -> Yojson.Basic.t
 
 (** [to_string p] is the string representation of [p] *)
 val to_string : t -> string
+
+(** [distance p1 p2] is distance between point [p1] and point [p2]. *)
+val distance : t -> t -> float
