@@ -13,6 +13,8 @@ type database = {
   tag_index : reverse_index;
 }
 
+let name db = db.name
+
 let entry_of_element e = e
 
 let create_element = Entry.manual
