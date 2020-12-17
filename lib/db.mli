@@ -29,6 +29,8 @@ val find : database -> string -> element
 
 val data_of_element : element -> Yojson.Basic.t
 
+val entry_of_element : element -> Entry.t
+
 val tags_of_element : element -> string list
 
 val location_of_element : element -> Point.t
