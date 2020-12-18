@@ -28,22 +28,13 @@ let perimeter ((x0, y0), (x1, y1)) =
 
 let of_point p = (p, p)
 
-(** [enlargement_pt p rect] is the new rectangle and the difference
-    in area by adding [p] within rectanle [rect] *)
-(*let enlargement_pt (x0, y0) ((x0', y0'), (x1', y1')) = 
-  match is_in (x0, y0) ((x0', y0'), (x1', y1')) with
-  | true -> ((x0', y0'), (x1', y1')), 0.
-  | false -> let new_rect = ((min x0 x0', min y0 y0'), 
-                             (max x0 x1', max y0 y1')) 
-    in new_rect, area new_rect -. area ((x0', y0'), (x1', y1'))*)
-
-
 (** [enlargement_rect rect1 rect2] is the new bounding box by adding [rect2] to
     [rect1]. *)
 let enlargement_rect ((x0, y0), (x1, y1)) ((x0', y0'), (x1', y1')) = 
   ((min x0 x0', min y0 y0'), (max x1 x1', max y1 y1'))
 
-let mbr_of_list (lst : t list) : t = List.fold_left enlargement_rect (List.hd lst) lst
+let mbr_of_list (lst : t list) : t = 
+  List.fold_left enlargement_rect (List.hd lst) lst
 
 let enlarge_rect_area r1 r2 = 
   let new_rect = enlargement_rect r1 r2

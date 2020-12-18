@@ -230,6 +230,16 @@ let find e tree =
   in try find_aux e [tree] with
   | _ -> false, entry
 
+let rec search c r node =
+  let acc = ref [] in
+  if not (Circle.intersect c r node.mbr) then [] else
+    match node.children with
+    | `Entry x -> [x]
+    | `Node lst -> begin
+        List.iter (fun el -> acc := !acc @ search c r el) lst;
+        !acc
+      end
+
 let rec propagate_mbr node =
   match node with
   | None -> ()

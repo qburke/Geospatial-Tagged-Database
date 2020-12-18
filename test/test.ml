@@ -241,3 +241,19 @@ let lst = to_list int_test_tree
 
 let () = assert(List.length lst = 0)
 let () = assert(int_test_tree = empty ())
+
+let int_test_tree = empty ()
+let () = execute (fun () -> 
+    add_from_to 0 elements_count int_test_tree)
+    (Printf.sprintf "\nadding %d elements increasing order" elements_count)
+
+let () = execute (fun () -> 
+    ignore(search (50000.,50000.) 100. int_test_tree))
+    (Printf.sprintf "\nSearch (50000.,50000.) 
+    100. from %d elements" elements_count)
+
+let collection = search (50000.,50000.) 100. int_test_tree
+let () = Printf.printf "Found: %d entries\n" (List.length collection)
+let () = List.iteri (fun idx x  -> 
+    Printf.printf "Entry %d [%f,%f]\n" 
+      idx (fst (Entry.loc x)) (snd (Entry.loc x))) collection
