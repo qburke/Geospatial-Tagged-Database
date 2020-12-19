@@ -1,9 +1,13 @@
 open Lib
 open OUnit2
 open Regression
+    (*
 open Database_test
 open Rect_test
+*)
 open Rtree
+
+open Rnn_test
 
 let int_tree_1 = empty ()
 let () = add (Entry.manual "3" (1., 2.) [] `Null) int_tree_1
@@ -146,10 +150,11 @@ let rtree_tests = List.flatten [
 *)
 let suite =
   "test suite for final_project"  >::: List.flatten [
-    rect_tests;
+   (*  rect_tests;
     rtree_tests;
-    db_tests;
+       db_tests; *)
     (*entry_tests;*)
+    rnn_tests
   ]
 
 let _ = run_test_tt_main suite
@@ -184,7 +189,7 @@ let () = remove
     (Entry.manual "100" (100., 100.) [] `Null) int_test_tree
 let () = assert_find 
     (Entry.manual "100" (100., 100.) [] `Null)false int_test_tree
-
+(*
 (* Stress testing for 1 million elements add and 100k elements search/delete *)
 let elements_count = 100000
 
@@ -241,3 +246,4 @@ let lst = to_list int_test_tree
 
 let () = assert(List.length lst = 0)
 let () = assert(int_test_tree = empty ())
+*)

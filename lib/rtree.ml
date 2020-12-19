@@ -230,6 +230,57 @@ let find e tree =
   in try find_aux e [tree] with
   | _ -> false, entry
 
+
+let pdist (p1,p2) (q1,q2) =
+  ((p1 -. q1) ** 2.) +. ((p2 -. q2) ** 2.) |> sqrt
+
+let ldist (p1,p2) ((qb1,qb2),(qu1,qu2)) =
+  (* Left/Right Sides *)
+  if p2 <= qu2 && p2 >= qb2 then
+    if p1 < qb1 then pdist (p1,p2) (qb1,p2) else
+    if p1 > qu1 then pdist (p1,p2) (qu1,p2) else 0. else
+    (* Top/Bottom Sides *)
+  if p1 <= qu1 && p1 >= qb1 then
+    if p2 > qu2 then pdist (p1,p2) (p1,qu2) else
+    if p2 < qb2 then pdist (p1,p2) (p1,qb2) else 0. else
+    (* Upper Left *)
+  if p1 < qb1 && p2 > qu2 then pdist (p1,p2) (qb1,qu2) else
+    (* Upper Right *)
+  if p1 > qu1 && p2 > qu2 then pdist (p1, p2) (qu1, qu2) else
+    (* Bottom Left *)
+  if p1 < qb1 && p2 < qu2 then pdist (p1,p2) (qb1,qb2) else    
+    (* Bottom Right *)
+  if p1 > qu1 && p2 < qu2 then pdist (p1,p2) (qu1,qb2) else 0.
+    
+let mindist p a =
+  let pl = Entry.loc p in
+  match a.children with
+  | `Entry x -> Entry.loc x |> pdist pl
+  | `Node _ -> ldist pl a.mbr
+
+let rec rnn_aux r query node (nn,temp) =
+  (* Heuristic 3 *)
+  if mindist query node > temp then (nn,temp) else
+    (* Sphagetti Bullshit *)
+  if r != 1 then failwith "r not implemented" else
+    match node.children with
+    | `Entry x ->
+      if Entry.id x = Entry.id query then (nn,temp) else
+        let distp = pdist (Entry.loc x) (Entry.loc query) in
+        if distp < temp then ([x], distp) 
+        else (nn,temp) 
+    | `Node xs ->
+      List.rev_map (fun n -> (mindist query n, n)) xs |>
+      List.sort (fun (d1,_) (d2,_) -> compare d1 d2) |>
+      List.fold_left
+        (fun acc (_,n) -> fold_fun r query acc n)
+        (nn,temp)
+          
+and fold_fun r query acc n = rnn_aux r query n acc
+      
+let rnn r query node =
+  rnn_aux r query node ([],infinity)
+
 let rec propagate_mbr node =
   match node with
   | None -> ()

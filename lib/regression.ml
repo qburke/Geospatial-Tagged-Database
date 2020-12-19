@@ -1,10 +1,12 @@
 open Rtree
 
-let rec ints_from_to lb ub =
-  match lb = ub with
-  | true -> []
-  | false -> lb::ints_from_to (lb + 1) ub
-
+let ints_from_to lb ub =
+  let rec aux lbb acc =
+    match lbb = ub with
+    | true -> acc
+    | false -> aux (lbb + 1) (lbb::acc) in
+  aux lb [] |> List.rev
+    
 let entries_of_int_range lst =
   List.map (fun i -> ((float_of_int i, float_of_int i), i)) lst
 

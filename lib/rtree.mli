@@ -25,6 +25,9 @@ val mem : Entry.t -> t -> bool
     (leaf) that contains it. *)
 val find : Entry.t -> t -> bool * t
 
+(** [rnn r query node] TODO Documentation *)
+val rnn : int -> Entry.t -> t -> (Entry.t list * float)
+
 (** [to_list r] is the list of Points of the tree *)
 val to_list: t -> Entry.t list
 
@@ -38,3 +41,6 @@ val to_json : t -> Yojson.Basic.t
 val print_counters : int -> unit
 
 val reset_counters : unit -> unit
+
+(** TODO remove, debugging rnn helper functions *)
+val ldist : Point.t -> Rect.t -> float
