@@ -182,32 +182,40 @@ let elements_count = 100000
 (* [add] regression increasing order *)
 let int_test_tree = empty ()
 let () = execute 
-    (fun () -> add_from_to 0 elements_count int_test_tree)
-    (Printf.sprintf "test adding %d elements increasing order" elements_count)
+    (fun () -> 
+       add_from_to 0 elements_count int_test_tree)
+    (Printf.sprintf 
+       "test adding %d elements increasing order" elements_count)
 
 (* [add] regression decreasing order *)
 let int_test_tree = empty ()
 let () = execute 
-    (fun () -> add_from_to elements_count 0 int_test_tree)
-    (Printf.sprintf "test adding %d elements decreasing order" elements_count)
+    (fun () -> 
+       add_from_to elements_count 0 int_test_tree)
+    (Printf.sprintf 
+       "test adding %d elements decreasing order" elements_count)
 
 (* [add] regression random order *)
 let int_test_tree = empty ()
-let () = execute (fun () -> add_random elements_count 
-                     elements_count int_test_tree)
-    (Printf.sprintf "test adding %d random elements" elements_count)
+let () = execute 
+    (fun () -> add_random elements_count 
+        elements_count int_test_tree)
+    (Printf.sprintf 
+       "test adding %d random elements" elements_count)
 
 (* [add] regression cluster element *)
 let int_test_tree = empty ()
 let () = execute 
     (fun () -> add_cluster elements_count 
         (elements_count/10) elements_count int_test_tree)
-    (Printf.sprintf "test adding %d cluster elements" elements_count)
+    (Printf.sprintf 
+       "test adding %d cluster elements" elements_count)
 
 (* [length] regression *)
 let int_test_tree = empty ()
 let () = add_from_to 0 elements_count int_test_tree
-let () = Printf.printf "Tree with %d element has tree length of = %d\n" 
+let () = Printf.printf 
+    "Tree with %d element has tree length of = %d\n" 
     elements_count (length int_test_tree)
 
 let elements_count = 100000
@@ -238,14 +246,22 @@ let () = assert(int_test_tree = empty ())
 
 (* test the search  *)
 let int_test_tree = empty ()
-let () = execute (fun () -> add_from_to 0 elements_count int_test_tree)
-    (Printf.sprintf "\nadding %d elements increasing order" elements_count)
+let () = execute 
+    (fun () -> 
+       add_from_to 0 elements_count int_test_tree)
+    (Printf.sprintf 
+       "\nadding %d elements increasing order" elements_count)
 
-let () = execute (fun () -> ignore(search (50000.,50000.) 100. int_test_tree))
-    (Printf.sprintf "\nSearch (50000.,50000.) 100. from %d elements" 
+let () = execute 
+    (fun () -> 
+       ignore(search (50000.,50000.) 100. int_test_tree))
+    (Printf.sprintf 
+       "\nSearch (50000.,50000.) 100. from %d elements" 
        elements_count)
 
 let collection = search (50000.,50000.) 100. int_test_tree
-let () = Printf.printf "Found: %d entries\n" (List.length collection)
-let () = List.iteri (fun idx x  -> Printf.printf "Entry %d [%f,%f]\n" idx 
-                        (fst (Entry.loc x)) (snd (Entry.loc x))) collection
+let () = Printf.printf 
+    "Found: %d entries\n" (List.length collection)
+let () = List.iteri 
+    (fun idx x  -> Printf.printf "Entry %d [%f,%f]\n" idx 
+        (fst (Entry.loc x)) (snd (Entry.loc x))) collection

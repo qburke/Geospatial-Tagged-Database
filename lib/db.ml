@@ -72,8 +72,10 @@ let add db e =
 let remove db e : unit =
   let f s =
     Hashtbl.remove (Hashtbl.find db.tag_index s) e;
-    if Hashtbl.length (Hashtbl.find db.tag_index s) = 0 then
-      Hashtbl.remove db.tag_index s; in
+    if Hashtbl.length (Hashtbl.find db.tag_index s) = 0 
+    then
+      Hashtbl.remove db.tag_index s; 
+  in
   if Hashtbl.mem db.elements (Entry.id e) |> not 
   then failwith "Not in database" 
   else
@@ -85,7 +87,10 @@ let to_rtree_json db f : unit =
   db.rTree |> Rtree.to_json |> Yojson.Basic.to_file f
 
 let to_list_json db f : unit =
-  let entries = Hashtbl.fold (fun _ v acc -> v :: acc) db.elements [] in
+  let entries = Hashtbl.fold 
+      (fun _ v acc -> v :: acc) 
+      db.elements [] 
+  in
   Yojson.Basic.(
     to_file f (`List (List.map Entry.to_json entries))
   ) 
