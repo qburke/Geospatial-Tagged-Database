@@ -25,11 +25,6 @@ val area : t -> float
 (** [perimeter rect] calculates the perimeter of [rect].*)
 val perimeter : t -> float
 
-(** [enlargement_pt (x0, y0) ((x0', y0'), (x1', y1'))] checks if 
-    pt [(x0, y0)] is in rect [((x0', y0'), (x1', y1'))] 
-    and returns enlargement area and new or existing rect. *)
-(*val enlargement_pt : Point.t -> t -> t * float*)
-
 (** [enlargement_rect rect1 rect2] is the new bounding box and the 
     after adding [rect2] to [rect1]. *)
 val enlargement_rect : t -> t -> t
@@ -42,3 +37,4 @@ val to_json : t -> Yojson.Basic.t
 
 (** [to_string r] is the string representation of [r] *)
 val to_string : t -> string
+
