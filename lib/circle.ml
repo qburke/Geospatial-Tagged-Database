@@ -1,3 +1,6 @@
+let contains c r p =
+  r >= distance c p
+
 let intersect (cx,cy) radius ((x0,y0),(x1,y1)) =
   let w_half = (x1 -. x0) /. 2. in
   let h_half = (y1 -. y0) /. 2. in
