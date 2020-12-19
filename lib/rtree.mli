@@ -34,6 +34,10 @@ val length: t -> int
 (** [to_json t] is the JSON representation of [t]. See R Tree schema. *)
 val to_json : t -> Yojson.Basic.t
 
+(** [search c r t] is the list of points in tree [t] that are in radius [r]
+    from center [c]. *)
+val search : Point.t -> float -> t -> Entry.t list
+
 (** TODO remove, this is for debugging the remove collapsing *)
 val print_counters : int -> unit
 

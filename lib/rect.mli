@@ -38,6 +38,3 @@ val to_json : t -> Yojson.Basic.t
 (** [to_string r] is the string representation of [r] *)
 val to_string : t -> string
 
-(** [search c r t] is the list of points in tree [t] that are in radius [r]
-    from center [c]. *)
-val search : Point.t -> float -> t -> Entry.t list
