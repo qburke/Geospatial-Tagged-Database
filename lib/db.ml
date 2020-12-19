@@ -56,7 +56,9 @@ let add db e =
     let get_tag_collection ri tag : tag_collection =
       if Hashtbl.mem ri tag 
       then Hashtbl.find ri tag
-      else (Hashtbl.create 1000 |> Hashtbl.add ri tag; Hashtbl.find ri tag) 
+      else (Hashtbl.create 1000 
+            |> Hashtbl.add ri tag;
+            Hashtbl.find ri tag) 
     in
     let rec add_to_index data = function
       | [] -> ignore(0);

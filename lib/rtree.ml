@@ -55,7 +55,8 @@ let added_nodes   = ref 0
 
 (* Print added_nodes, removed_nodes *)
 let print_counters uniq_nodes = Printf.printf 
-    "\nadded: %d, removed: %d, size: %d\n" !added_nodes !removed_nodes uniq_nodes
+    "\nadded: %d, removed: %d, size: %d\n" 
+    !added_nodes !removed_nodes uniq_nodes
 
 let reset_counters() = removed_nodes := 0; added_nodes := 0
 
@@ -110,9 +111,11 @@ let split (n : t list) : (t list * t list) =
       let mbr_s' = s' 
                    |> List.map (fun x -> x.mbr) 
                    |> Rect.mbr_of_list in
-      let new_perimeter_sum = (Rect.perimeter mbr_s) +. (Rect.perimeter mbr_s') 
+      let new_perimeter_sum = 
+        (Rect.perimeter mbr_s) +. (Rect.perimeter mbr_s') 
       in
-      if new_perimeter_sum < !min_perimeter_sum then begin
+      if new_perimeter_sum < !min_perimeter_sum 
+      then begin
         min_perimeter_sum := new_perimeter_sum; 
         min_split := (s, s')
       end
@@ -196,7 +199,8 @@ let rec add_aux entry node =
   match node.children with
   | `Entry _ -> (* goes one deeper than necessary*)
     let pnode = parent node
-    in let entry = {entry with parent = Some pnode }
+    in 
+    let entry = {entry with parent = Some pnode }
     in begin
       node_append entry pnode;
       (* when overflow, then split*)
@@ -256,7 +260,9 @@ let find e tree =
 
 let rec search c r node =
   let acc = ref [] in
-  if not (Circle.intersect c r node.mbr) then [] else
+  if not (Circle.intersect c r node.mbr) 
+  then [] 
+  else
     match node.children with
     | `Entry x -> [x]
     | `Node lst -> begin
@@ -296,12 +302,14 @@ let remove e tree =
 
 let rec to_list node =
   match node.children with
-  | `Node lst -> List.fold_left (fun acc el -> acc @ (to_list el)) [] lst
+  | `Node lst -> List.fold_left (
+      fun acc el -> acc @ (to_list el)) [] lst
   | `Entry e ->  [e]
 
 let rec length node =
   match node.children with
-  | `Node lst -> 1 + List.fold_right (fun el t -> max (length el) t) lst 0
+  | `Node lst -> 1 + List.fold_right 
+                   (fun el t -> max (length el) t) lst 0
   | `Entry _ -> 1
 
 (* FIXME *)
