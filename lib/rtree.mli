@@ -26,7 +26,7 @@ val mem : Entry.t -> t -> bool
 val find : Entry.t -> t -> bool * t
 
 (** [rnn r query node] TODO Documentation *)
-val rnn : int -> Entry.t -> t -> (Entry.t list * float)
+val knn : int -> Entry.t -> t -> Entry.t list
 
 (** [to_list r] is the list of Points of the tree *)
 val to_list: t -> Entry.t list

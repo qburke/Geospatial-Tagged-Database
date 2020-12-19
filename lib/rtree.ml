@@ -258,28 +258,49 @@ let mindist p a =
   | `Entry x -> Entry.loc x |> pdist pl
   | `Node _ -> ldist pl a.mbr
 
-let rec rnn_aux r query node (nn,temp) =
+let rec knn_aux query node nn =
+  let open Prio_queue in
+  (* NN_DIST is the distance from the K'th nearest neighbor *)
+  let (nn_dist, _, nn') = extract nn in
   (* Heuristic 3 *)
-  if mindist query node > temp then (nn,temp) else
-    (* Sphagetti Bullshit *)
-  if r != 1 then failwith "r not implemented" else
+  if mindist query node > nn_dist then nn else
     match node.children with
+    (* Leaf Level *)
     | `Entry x ->
-      if Entry.id x = Entry.id query then (nn,temp) else
+      if Entry.id x = Entry.id query then nn else
         let distp = pdist (Entry.loc x) (Entry.loc query) in
-        if distp < temp then ([x], distp) 
-        else (nn,temp) 
+        if distp < nn_dist then insert distp x nn'
+        else nn
+    (* Node Level *)
     | `Node xs ->
-      List.rev_map (fun n -> (mindist query n, n)) xs |>
-      List.sort (fun (d1,_) (d2,_) -> compare d1 d2) |>
+      let abl = 
+        List.rev_map (fun n -> (mindist query n, n)) xs |>
+        List.sort (fun (d1,_) (d2,_) -> compare d1 d2) in
       List.fold_left
-        (fun acc (_,n) -> fold_fun r query acc n)
-        (nn,temp)
-          
-and fold_fun r query acc n = rnn_aux r query n acc
-      
-let rnn r query node =
-  rnn_aux r query node ([],infinity)
+        (fun acc (_,n) -> fold_fun query acc n)
+        nn
+        abl
+
+and fold_fun query acc n = knn_aux query n acc
+
+let n_infty n =
+  let open Prio_queue in
+  let dummy = Entry.manual "" (0.,0.) [] `Null in 
+  let rec aux k acc =
+    match n = k with
+    | true -> acc
+    | false -> aux (k+1) (insert infinity dummy acc) in
+  aux 0 empty
+
+let knn k query node =
+(*  if r = 1 then
+    let (res,_) = nn_aux query node ([],infinity) in res 
+    else *)
+  let nn = n_infty k in
+  knn_aux query node nn |>
+  Prio_queue.to_list |>
+  List.filter (fun (p,_) -> p < infinity) |>
+  List.map (fun (_,x) -> x)
 
 let rec propagate_mbr node =
   match node with
