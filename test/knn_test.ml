@@ -54,7 +54,7 @@ let entry_1 = Entry.manual "1" (1.,1.) [] `Null
 let entry_2 = Entry.manual "2" (1.,2.) [] `Null
 let entry_500k = Entry.manual "500000" (500000.0,500000.0) [] `Null
 let entry_500kp1 = Entry.manual "500kp1" (500000.1,500000.1) [] `Null
-    
+
 let int_tree_1 = empty ()
 let () = add entry_1 int_tree_1
 
@@ -72,7 +72,7 @@ let () = add entry_1 int_tree_3
 let () = add entry_2 int_tree_3
 
 let () = ints_from_to 0 1 |> ignore
-   
+
 let () = ints_from_to 3 10000 |>
          List.rev_map
            (fun x -> (string_of_int x,
@@ -180,12 +180,12 @@ let q1 =
   let e4 = insert  0. "d" in
   empty |> e1 |> e2 |> e3 |> e4
 
-     
-let rnn_tests = [
+
+let knn_tests = [
   (* Priority queue tests *)
   to_list_test "Simple List test" q1 ["d";"b";"a";"c"];
   extract_test "Simple List test" q1 "c";              
-  
+
   (* Distance calculation tests *)
   ldist_test "Left Side" (-5.56, 0.223) rect1 4.56;
   ldist_test "Right Side" (7.62, 0.308) rect1 6.62;
@@ -200,7 +200,7 @@ let rnn_tests = [
   (* k=1 *)
   knn_test "One element,k1" 1 entry_1 int_tree_1 [entry_debug];
   knn_test "Two elements,k1" 1 entry_1 int_tree_2 [entry_2];
-    
+
   knn_test "10000 elements,k1" 1 entry_500k int_tree_3 [entry_500kp1];
 
   knn_test "Three elements,k2" 2 entry_1 int_tree_25
