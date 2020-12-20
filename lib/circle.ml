@@ -1,3 +1,5 @@
+open Point
+
 let contains c r p =
   r >= distance c p
 

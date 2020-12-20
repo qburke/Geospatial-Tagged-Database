@@ -39,4 +39,4 @@ docs-private: build
 
 clean:
 	dune clean
-	rm -rf doc.public ms3.zip ms2.zip
+	rm -rf doc.public 
