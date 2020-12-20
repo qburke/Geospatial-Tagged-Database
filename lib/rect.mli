@@ -1,3 +1,5 @@
+(** A 2D Cartesian rectangle *)
+
 (** The abstract type of values representing Rects. *)
 type t = Point.t * Point.t
 

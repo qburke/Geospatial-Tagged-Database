@@ -1,3 +1,5 @@
+(** Geospatial tagged mutable database *)
+
 (** ['a element] is the type of an element of the database.
         which contains data of type ['a] and a set of tags associated
         with it  of type [string list] *)
@@ -22,27 +24,38 @@ type database
 (** [create data tags] returns an ['a element] *)
 val create_element : string -> Point.t -> string list -> Yojson.Basic.t -> element
 
+(** [name db] is the name of [db]. *)
 val name : database -> string
 
+(** [id_of_element e] is the id of [e]. *)
 val id_of_element : element -> string
 
-(* FIXME *)
+(** [find db id] is the element in [db] with id [id]. Raises [Not_found] if no
+    such element exists. *)
 val find : database -> string -> element
 
+(** [data_of_element e] is the JSON representation of [e]. *)
 val data_of_element : element -> Yojson.Basic.t
 
+(** [entry_of_element e] is the Entry representation of [e]. *)
 val entry_of_element : element -> Entry.t
 
+(** [tags_of_element e] is the list of tags of [e]. *)
 val tags_of_element : element -> string list
 
+(** [location_of_element e] *)
 val location_of_element : element -> Point.t
 
+(** [create_db name] is a new, empty database named [name] *)
 val create_db : string -> database 
 
+(** TODO *)
 val list_of_reverse_index : database -> string list
 
+(** TODO *)
 val list_of_tag_collection : database -> string -> element list
 
+(** TODO *)
 val list_of_elements : database -> element list
 
 (** [add db e]  adds the data of type ['a] of an item of type ['a element] to

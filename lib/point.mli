@@ -1,3 +1,5 @@
+(** A coordinate point *)
+
 (** [t] is the type representing geospatial coordinate points. *)
 type t = float * float
 

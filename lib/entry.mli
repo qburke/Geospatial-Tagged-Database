@@ -1,3 +1,6 @@
+(** An entry requiring an id, location, and tags *)
+
+(** [type t] is the type of entries*)
 type t
 
 (** [from_json json] is the Entry constructed from [json]. Raises an exception

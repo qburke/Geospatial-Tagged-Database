@@ -1,5 +1,5 @@
 (**
-   Parsing of interface commands
+   Handles parsing of interface commands
 *)
 
 (** The type [object_phrase] represents an argument to a command *)
@@ -40,5 +40,5 @@ exception Malformed
 
     Raises: [Malformed] if the command is malformed. 
 *)
-  
+
 val parse : string -> command
