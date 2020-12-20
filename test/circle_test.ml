@@ -1,6 +1,5 @@
 open OUnit2
-open Point
-open Rect
+open Lib
 open Circle
 
 let center1 = Point.origin
