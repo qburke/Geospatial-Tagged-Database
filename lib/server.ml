@@ -11,16 +11,24 @@ exception MalformedJSON
 exception EntryNotFound of string
 
 let exn_response exn =
-  let err_msg = match exn with
-    | ParamNotFound p -> "Required parameter \"" ^ p ^ "\" not found"
-    | DbNotLoaded -> "Database not loaded"
-    | Registry.DbAlreadyLoaded -> "Database already loaded"
-    | Sys_error _ -> "Database not found"
-    | MalformedTagList -> "Tag list must be a JSON array of strings"
-    | MalformedJSON -> "Malformed JSON"
-    | EntryNotFound id -> "Entry with id \"" ^ id ^ "\" not found"
-    | _ -> "Unknown error"
-  in err_msg |> Response.of_plain_text |> Lwt.return
+  let status, err_msg = match exn with
+    | ParamNotFound p ->
+      `Bad_request, "Required parameter \"" ^ p ^ "\" not found"
+    | DbNotLoaded ->
+      `Not_found, "Database not loaded"
+    | Registry.DbAlreadyLoaded ->
+      `Conflict, "Database already loaded"
+    | Sys_error _ ->
+      `Not_found, "Database not found"
+    | MalformedTagList ->
+      `Bad_request, "Tag list must be a JSON array of strings"
+    | MalformedJSON ->
+      `Bad_request, "Malformed JSON"
+    | EntryNotFound id ->
+      `Not_found, "Entry with id \"" ^ id ^ "\" not found"
+    | _ -> `Bad_request, "Unknown error"
+  in Response.of_plain_text ~status:status err_msg
+     |> Lwt.return
 
 let reg = Registry.init ()
 
