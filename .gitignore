@@ -9,6 +9,7 @@
 _build
 
 # temporary files
+*.db
 *.zip
 *.swp
 *~
