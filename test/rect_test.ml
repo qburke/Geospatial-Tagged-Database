@@ -48,5 +48,4 @@ let rect_tests = [
     ((0., 0.), (3., 3.));
   mbr_of_list_test "MBR of points (0,0) to (9,9) is (0,0), (9,9)" points_1 
     ((0., 0.), (9., 9.));
-
 ]
