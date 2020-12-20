@@ -4,10 +4,11 @@ open Regression
 
 open Database_test
 open Rect_test
+open Circle_test
+open Knn_test
 
 open Rtree
 
-open Knn_test
 
 let int_tree_1 = empty ()
 let () = add (Entry.manual "3" (1., 2.) [] `Null) int_tree_1
@@ -141,11 +142,12 @@ let rtree_tests = List.flatten [
 
 let suite =
   "test suite for final_project"  >::: List.flatten [
-   rect_tests;
-   rtree_tests;
-   db_tests;
-   (* entry_tests;*)
-   rnn_tests
+    rect_tests;
+    circle_tests;
+    rtree_tests;
+    db_tests;
+    (* entry_tests;*)
+    rnn_tests
   ]
 
 let _ = run_test_tt_main suite
