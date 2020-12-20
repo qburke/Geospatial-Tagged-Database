@@ -11,7 +11,8 @@ type vector = float * float
 let random_vec () =
   let open Random in
   self_init ();
-  (float 100., float 100.)
+  (float 200. -. 100.,
+   float 200. -. 100.)
 
 let mag (x,y) = sqrt ((x ** 2.) +. (y ** 2.))
 
@@ -50,7 +51,7 @@ let test_case vl =
 let rtn o n () =
   vecl o n () |> test_case
   
-
+(* PRE NEGATIVE NUMBER UPDATE *)
 (* List of 10 Random vectors generated with rtn about (0.,0.)
 let re_10 = Entry.manual "10"(5.14978927308,8.5720283739) [] `Null;
 let re_9 = Entry.manual "9" (8.69086653949,2.33855485136) [] `Null;
@@ -84,4 +85,17 @@ let rre_4 = Entry.manual "4" (53.717220119,26.8172523776) [] `Null
 let rre_3 = Entry.manual "3" (52.7292939919,26.5853731592) [] `Null
 let rre_2 = Entry.manual "2" (51.6311247534,26.4973383424) [] `Null
 let rre_1 = Entry.manual "1" (50.9993467265,25.3761402844) [] `Null
- *)
+*)
+
+(* POST NEGATIVE NUMBER UPDATE *)
+(* let r3e_10 = Entry.manual "10" (-8.39624343642,-5.43167526242) [] `Null
+let r3e_9 = Entry.manual "9" (0.510260421565,8.98552359644) [] `Null
+let r3e_8 = Entry.manual "8" (-3.44972362676,-7.21799188826) [] `Null
+let r3e_7 = Entry.manual "7" (6.56098736978,-2.43996818291) [] `Null
+let r3e_6 = Entry.manual "6" (-5.58722040722,2.18699979907) [] `Null
+let r3e_5 = Entry.manual "5" (-1.85311163112,4.64391831136) [] `Null
+let r3e_4 = Entry.manual "4" (-0.0600649392541,3.99954899996) [] `Null
+let r3e_3 = Entry.manual "3" (-2.97301203007,-0.401496536777) [] `Null
+let r3e_2 = Entry.manual "2" (-0.450354857044,1.94863554898) [] `Null
+let r3e_1 = Entry.manual "1" (-0.643199593687,0.765698558625) [] `Null
+*)
