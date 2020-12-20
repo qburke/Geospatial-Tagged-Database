@@ -25,6 +25,9 @@ val mem : Entry.t -> t -> bool
     (leaf) that contains it. *)
 val find : Entry.t -> t -> bool * t
 
+(** [knn r query node] TODO Documentation *)
+val knn : int -> Entry.t -> t -> Entry.t list
+
 (** [to_list r] is the list of Points of the tree *)
 val to_list: t -> Entry.t list
 
@@ -34,7 +37,14 @@ val length: t -> int
 (** [to_json t] is the JSON representation of [t]. See R Tree schema. *)
 val to_json : t -> Yojson.Basic.t
 
+(** [search c r t] is the list of points in tree [t] that are in radius [r]
+    from center [c]. *)
+val search : Point.t -> float -> t -> Entry.t list
+
 (** TODO remove, this is for debugging the remove collapsing *)
 val print_counters : int -> unit
 
 val reset_counters : unit -> unit
+
+(** TODO remove, debugging rnn helper functions *)
+val ldist : Point.t -> Rect.t -> float

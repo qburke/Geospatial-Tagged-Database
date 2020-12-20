@@ -50,10 +50,16 @@ let list_of_elements db =
   Hashtbl.fold (fun _ v acc ->v::acc) db.elements []
 
 let add db e =
-  if Hashtbl.mem db.elements (Entry.id e) then failwith "No duplicates" else
+  if Hashtbl.mem db.elements (Entry.id e) 
+  then failwith "No duplicates" 
+  else
     let get_tag_collection ri tag : tag_collection =
-      if Hashtbl.mem ri tag then Hashtbl.find ri tag
-      else (Hashtbl.create 1000 |> Hashtbl.add ri tag; Hashtbl.find ri tag) in
+      if Hashtbl.mem ri tag 
+      then Hashtbl.find ri tag
+      else (Hashtbl.create 1000 
+            |> Hashtbl.add ri tag;
+            Hashtbl.find ri tag) 
+    in
     let rec add_to_index data = function
       | [] -> ignore(0);
       | x::xs ->
@@ -66,9 +72,13 @@ let add db e =
 let remove db e : unit =
   let f s =
     Hashtbl.remove (Hashtbl.find db.tag_index s) e;
-    if Hashtbl.length (Hashtbl.find db.tag_index s) = 0 then
-      Hashtbl.remove db.tag_index s; in
-  if Hashtbl.mem db.elements (Entry.id e) |> not then failwith "Not in database" else
+    if Hashtbl.length (Hashtbl.find db.tag_index s) = 0 
+    then
+      Hashtbl.remove db.tag_index s; 
+  in
+  if Hashtbl.mem db.elements (Entry.id e) |> not 
+  then failwith "Not in database" 
+  else
     (List.map f (Entry.tags e) |> ignore;
      Hashtbl.remove db.elements (Entry.id e);
      Rtree.remove e db.rTree;)
@@ -77,7 +87,10 @@ let to_rtree_json db f : unit =
   db.rTree |> Rtree.to_json |> Yojson.Basic.to_file f
 
 let to_list_json db f : unit =
-  let entries = Hashtbl.fold (fun _ v acc -> v :: acc) db.elements [] in
+  let entries = Hashtbl.fold 
+      (fun _ v acc -> v :: acc) 
+      db.elements [] 
+  in
   Yojson.Basic.(
     to_file f (`List (List.map Entry.to_json entries))
   ) 
@@ -88,7 +101,10 @@ let tag_search db objects tags =
     Hashtbl.mem tag_set elem in
   let filter_func elem =
     List.fold_left
-      (fun acc tag-> if ri_lookup tag elem then acc else false) true tags in
+      (fun acc tag-> 
+         if ri_lookup tag elem 
+         then acc 
+         else false) true tags in
   List.filter filter_func objects
 
 let string_of_element v e =

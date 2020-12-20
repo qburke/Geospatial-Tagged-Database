@@ -3,6 +3,9 @@
 A tag and coordinate-based database with r-nearest neighbor search capabilities
 
 ## Features
-- Store location and tag based data
-- Perform r-nearest neighbor queries along with tag-based search queries
-- Efficient implementation
+- Store and access location and tag based data both on CLI and local server
+- Perform r-nearest neighbor (radius-based) queries and k-nearest neighbor 
+  queries
+- Perform discrete tag-based search queries
+- Efficient implementation through node splitting and merging with minimizing 
+  area overlaps between nodes

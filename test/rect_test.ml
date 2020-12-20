@@ -38,10 +38,14 @@ let points_1 = List.map
     (fun i -> Rect.of_point (float_of_int i, float_of_int i)) 
     (ints_from_to 0 10)
 
+let points_2 = List.map
+    (fun i -> Rect.of_point (float_of_int i, float_of_int i)) 
+    (ints_from_to 0 100)
+
 let rect_tests = [
   enlargement_rect_test "rect1 rect2" rect1 rect2 ((1., 2.), (2., 8.));
   enlargement_rect_test "rect1 rect2" Rect.empty ((3., 3.), (3., 3.)) 
     ((0., 0.), (3., 3.));
   mbr_of_list_test "MBR of points (0,0) to (9,9) is (0,0), (9,9)" points_1 
-    ((0., 0.), (9., 9.))
+    ((0., 0.), (9., 9.));
 ]
