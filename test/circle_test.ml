@@ -6,39 +6,48 @@ open Circle
 let center1 = Point.origin
 let radius1 = 3.
 
-(* each rect in one quadran (I, II, III, IV) *)
+(* each rect in one quadrant (I, II, III, IV) *)
 let rect_A    = ((2.,1.),   (6.,5.))
 let rect_B    = ((2.,-5.),  (6.,-1.))
 let rect_C    = ((-6.,-5.), (-2.,-1.))
 let rect_D    = ((-6.,1.),  (-2.,5.))
 
-(* stretch quadran I to II, II to I, III to IV, IV to III *)
+(* stretch quadrant I to II, II to I, III to IV, IV to III *)
 let rect_A'   = ((2.,-1.),  (6.,5.))
 let rect_B'   = ((2.,-5.),  (6.,1.))
 let rect_C'   = ((-6.,-5.), (-2.,1.))
 let rect_D'   = ((-6.,-1.),  (-2.,5.))
 
-(* stretch quadran I to IV, II to III, III to II, IV to I *)
+(* stretch quadrant I to IV, II to III, III to II, IV to I *)
 let rect_A''  = ((-1.,1.),   (6.,5.))
 let rect_B''  = ((-1.,-5.),  (6.,-1.))
 let rect_C''  = ((-6.,-5.),  (1.,-1.))
 let rect_D''  = ((-6.,1.),   (1.,5.))
 
-(* each rect in one quadran (I, II, III, IV) touches the perimeter *)
+(* each rect in one quadrant (I, II, III, IV) touches the perimeter *)
 let rect_I    = ((3.,-2.),   (7.,2.))
 let rect_J    = ((-7.,-2.),  (-3.,2.))
 let rect_K    = ((-2.,-7.), (2.,-3.))
 let rect_L    = ((-2.,3.),  (2.,7.))
 
-(* no intersection points for quadran I - IV *)
+(* no intersection points for quadrant I - IV *)
 let rect_E    = ((3.,1.),   (6.,5.))
 let rect_F    = ((3.,-5.),  (6.,-1.))
 let rect_G    = ((-6.,-5.), (-3.,-1.))
 let rect_H    = ((-6.,1.),  (-3.,5.))
 
+(* rectangle points extend outside of circle for +y,-y directions *)
+let rect_E'   = ((-6., -4.), (-2., 4.))
+let rect_F'   = ((2., -4.), (6., 4.))
+
+(* rectangle points extend outside of circle for +x,-x directions *)
+let rect_E''   = ((-4., 1.), (4., 5.))
+let rect_F''   = ((-4., -6.), (4., -2.))
+
+(* rectangle points extend outside of circle for all directions *)
+let rect_G'   = ((-4., -4.), (4., 4.))
 
 let center2 = (100.,100.)
-let radiu2 = 3.
 let rect_P    = ((102., 101.), (106., 105.))
 let rect_Q    = ((102., 95.),  (106., 99.))
 let rect_R    = ((94.,  95.),  (98.,99.))
@@ -179,13 +188,38 @@ let circle_tests = [
     center1 radius1 rect_L true;
 
   intersect_circle_test 
+    "Center at origin, radius 3, 
+    rect greater than perimeter vertically Q2,3"    
+    center1 radius1 rect_E' true;
+
+  intersect_circle_test 
+    "Center at origin, radius 3, 
+    rect greater than perimeter vertically Q1,4"    
+    center1 radius1 rect_F' true;
+
+  intersect_circle_test 
+    "Center at origin, radius 3, 
+    rect greater than perimeter horizontally Q1,2"    
+    center1 radius1 rect_E'' true;
+
+  intersect_circle_test 
+    "Center at origin, radius 3, 
+    rect greater than perimeter horizontally Q3,4"    
+    center1 radius1 rect_F'' true;
+
+  intersect_circle_test 
+    "Center at origin, radius 3, 
+    rect encapsulates circle"    
+    center1 radius1 rect_G' true;
+
+  intersect_circle_test 
     "Center at (100.,100.), 
     radius 3, rect in quadrant I"   
     center2 radius1 rect_P true;
 
   intersect_circle_test 
     "Center at (100.,100.), 
-    adius 3, rect in quadran II"  
+    radius 3, rect in quadrant II"  
     center2 radius1 rect_Q true;
 
   intersect_circle_test 
@@ -195,7 +229,7 @@ let circle_tests = [
 
   intersect_circle_test 
     "Center at (100.,100.), 
-    radius 3, rect in quadran IV"
+    radius 3, rect in quadrant IV"
     center2 radius1 rect_S true;
 
   intersect_circle_test 
