@@ -1,4 +1,5 @@
 open Opium
+module Log = Dolog.Log
 
 (* FIXME Yojson Basic vs Safe
    TODO reexamine db function overhead -- search needs db as list? remove needs to find first?
@@ -23,6 +24,28 @@ let exn_response exn =
 
 let reg = Registry.init ()
 
+let timestamp_msg oc optype msg=
+  let utime = Unix.time() in
+  let time = utime |> Unix.localtime in
+  let us, _s = modf utime in
+  Printf.fprintf oc "%04d-%02d-%02d %02d:%02d:%02d.%03d %s: %s\n"
+    (1900 + time.Unix.tm_year)
+    (1    + time.Unix.tm_mon)
+    time.Unix.tm_mday
+    time.Unix.tm_hour
+    time.Unix.tm_min
+    time.Unix.tm_sec
+    (int_of_float (1_000. *. us))
+    optype
+    msg
+
+let add_log_entry dbname optype msg = 
+  let fname = dbname ^ ".log" in
+  let oc = open_out_gen [Open_append; Open_creat] 0o666 fname in
+  timestamp_msg oc optype msg;
+  close_out oc
+
+
 (** [get_req_param k req] gets the value of query param with key [k] in request
     [req]. Raises [ParamNotFound k] if param is not found in [req]. *)
 let get_req_param key req =
@@ -42,7 +65,9 @@ let db_from_req req =
 
 let initialize_handler req =
   try
-    get_req_param "name" req
+    let dbname = get_req_param "name" req in
+    add_log_entry dbname "INITIALIZE" "";
+    dbname
     |> Registry.add_new reg
     |> Response.of_plain_text
     |> Lwt.return
@@ -104,12 +129,15 @@ let add_handler req =
                       |> Yojson.Safe.to_basic
                       |> Entry.from_json
          in let db = db_from_req req
+         in let dbname = get_req_param "db" req
          in let elem = Db.create_element
                 (Entry.id ent)
                 (Entry.loc ent)
                 (Entry.tags ent)
                 (Entry.to_json ent)
          in let () = Db.add db elem
+         in let msg = ent |> Entry.to_json |> Yojson.Basic.to_string
+         in let () = add_log_entry dbname "ADD" msg;
          in "Success"
             |> Response.of_plain_text
             |> Lwt.return
@@ -120,12 +148,14 @@ let add_handler req =
 let delete_handler req = 
   try 
     let db = db_from_req req
+    in let dbname = get_req_param "db" req
     in let id = get_req_param "id" req
     in let ent = begin
         try Db.find db id with
         | Not_found -> raise (EntryNotFound id)
       end
     in let () = Db.remove db ent
+    in let () = add_log_entry dbname "DELETE" id;
     in "Success"
        |> Response.of_plain_text
        |> Lwt.return
@@ -136,14 +166,15 @@ let write_handler req =
   try 
     let db = db_from_req req
     in let filename = (Db.name db) ^ ".db"
-    in let () = Db.to_list_json db filename
-    in "Success"
-       |> Response.of_plain_text
-       |> Lwt.return
+    in let () = Db.to_list_json db filename in
+    "Success"
+    |> Response.of_plain_text
+    |> Lwt.return
   with
   | e -> exn_response e
 
 let start () =
+  Log.color_off ();
   App.empty
   |> App.post "/initialize" initialize_handler
   |> App.post "/add" add_handler
@@ -152,3 +183,5 @@ let start () =
   |> App.post "/load" load_handler
   |> App.post "/write" write_handler
   |> App.run_command
+
+
