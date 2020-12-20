@@ -14,6 +14,7 @@ let exn_response exn =
   let err_msg = match exn with
     | ParamNotFound p -> "Required parameter \"" ^ p ^ "\" not found"
     | DbNotLoaded -> "Database not loaded"
+    | Registry.DbAlreadyLoaded -> "Database already loaded"
     | Sys_error _ -> "Database not found"
     | MalformedTagList -> "Tag list must be a JSON array of strings"
     | MalformedJSON -> "Malformed JSON"

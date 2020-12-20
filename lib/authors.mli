@@ -6,11 +6,11 @@
  ************************************************************) 
 
 (** CS 3110 Fall 2020 Final Project
-    @authors Quin Burke (qjb5)
-                       Woosang Kang (wk228)
-                       David Needles (dpn28)
-                       Valene Tjong (vyt3)
- *)
+    Quin Burke (qjb5)
+    Woosang Kang (wk228)
+    David Needles (dpn28)
+    Valene Tjong (vyt3)
+*)
 
 (************************************************************ 
 

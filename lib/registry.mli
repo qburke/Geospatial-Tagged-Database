@@ -1,6 +1,8 @@
 (** type t is the type of database registry *)
 type t
 
+exception DbAlreadyLoaded
+
 (** [init ()] is a new empty database registry. *)
 val init : unit -> t
 

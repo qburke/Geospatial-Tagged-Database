@@ -20,3 +20,4 @@ _build
 !test_entry.json
 results
 **/.merlin
+*.db
