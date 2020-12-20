@@ -146,7 +146,7 @@ let suite =
     circle_tests;
     rtree_tests;
     db_tests;
-    (* entry_tests;*)
+    knn_tests;
     rnn_tests;
   ]
 
