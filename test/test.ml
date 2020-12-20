@@ -1,9 +1,13 @@
 open Lib
 open OUnit2
 open Regression
+
 open Database_test
 open Rect_test
+
 open Rtree
+
+open Knn_test
 
 let int_tree_1 = empty ()
 let () = add (Entry.manual "3" (1., 2.) [] `Null) int_tree_1
@@ -137,10 +141,11 @@ let rtree_tests = List.flatten [
 
 let suite =
   "test suite for final_project"  >::: List.flatten [
-    rect_tests;
-    rtree_tests;
-    db_tests;
-    (*entry_tests;*)
+   rect_tests;
+   rtree_tests;
+   db_tests;
+   (* entry_tests;*)
+   rnn_tests
   ]
 
 let _ = run_test_tt_main suite

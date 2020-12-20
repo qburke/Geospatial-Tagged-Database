@@ -258,6 +258,77 @@ let find e tree =
   in try find_aux e [tree] with
   | _ -> false, entry
 
+let pdist (p1,p2) (q1,q2) =
+  ((p1 -. q1) ** 2.) +. ((p2 -. q2) ** 2.) |> sqrt
+
+let ldist (p1,p2) ((qb1,qb2),(qu1,qu2)) =
+  (* Left/Right Sides *)
+  if p2 <= qu2 && p2 >= qb2 then
+    if p1 < qb1 then pdist (p1,p2) (qb1,p2) else
+    if p1 > qu1 then pdist (p1,p2) (qu1,p2) else 0. else
+    (* Top/Bottom Sides *)
+  if p1 <= qu1 && p1 >= qb1 then
+    if p2 > qu2 then pdist (p1,p2) (p1,qu2) else
+    if p2 < qb2 then pdist (p1,p2) (p1,qb2) else 0. else
+    (* Upper Left *)
+  if p1 < qb1 && p2 > qu2 then pdist (p1,p2) (qb1,qu2) else
+    (* Upper Right *)
+  if p1 > qu1 && p2 > qu2 then pdist (p1, p2) (qu1, qu2) else
+    (* Bottom Left *)
+  if p1 < qb1 && p2 < qu2 then pdist (p1,p2) (qb1,qb2) else    
+    (* Bottom Right *)
+  if p1 > qu1 && p2 < qu2 then pdist (p1,p2) (qu1,qb2) else 0.
+    
+let mindist p a =
+  let pl = Entry.loc p in
+  match a.children with
+  | `Entry x -> Entry.loc x |> pdist pl
+  | `Node _ -> ldist pl a.mbr
+
+let rec knn_aux query node nn =
+  let open Prio_queue in
+  (* NN_DIST is the distance from the K'th nearest neighbor *)
+  let (nn_dist, _, nn') = extract nn in
+  (* Heuristic 3 *)
+  if mindist query node > nn_dist then nn else
+    match node.children with
+    (* Leaf Level *)
+    | `Entry x ->
+      if Entry.id x = Entry.id query then nn else
+        let distp = pdist (Entry.loc x) (Entry.loc query) in
+        if distp < nn_dist then insert distp x nn'
+        else nn
+    (* Node Level *)
+    | `Node xs ->
+      let abl = 
+        List.rev_map (fun n -> (mindist query n, n)) xs |>
+        List.sort (fun (d1,_) (d2,_) -> compare d1 d2) in
+      List.fold_left
+        (fun acc (_,n) -> fold_fun query acc n)
+        nn
+        abl
+
+and fold_fun query acc n = knn_aux query n acc
+
+let n_infty n =
+  let open Prio_queue in
+  let dummy = Entry.manual "" (0.,0.) [] `Null in 
+  let rec aux k acc =
+    match n = k with
+    | true -> acc
+    | false -> aux (k+1) (insert infinity dummy acc) in
+  aux 0 empty
+
+let knn k query node =
+(*  if r = 1 then
+    let (res,_) = nn_aux query node ([],infinity) in res 
+    else *)
+  let nn = n_infty k in
+  knn_aux query node nn |>
+  Prio_queue.to_list |>
+  List.filter (fun (p,_) -> p < infinity) |>
+  List.map (fun (_,x) -> x)
+
 let rec search c r node =
   let acc = ref [] in
   if not (Circle.intersect c r node.mbr) 
@@ -269,7 +340,7 @@ let rec search c r node =
         List.iter (fun el -> acc := !acc @ search c r el) lst;
         !acc
       end
-
+      
 let rec propagate_mbr node =
   match node with
   | None -> ()

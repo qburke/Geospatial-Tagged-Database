@@ -25,6 +25,9 @@ val mem : Entry.t -> t -> bool
     (leaf) that contains it. *)
 val find : Entry.t -> t -> bool * t
 
+(** [rnn r query node] TODO Documentation *)
+val knn : int -> Entry.t -> t -> Entry.t list
+
 (** [to_list r] is the list of Points of the tree *)
 val to_list: t -> Entry.t list
 
@@ -42,3 +45,6 @@ val search : Point.t -> float -> t -> Entry.t list
 val print_counters : int -> unit
 
 val reset_counters : unit -> unit
+
+(** TODO remove, debugging rnn helper functions *)
+val ldist : Point.t -> Rect.t -> float
