@@ -1,4 +1,4 @@
-MODULES=rtree point rect db command state entry regression database_test rect_test circle_test
+MODULES=rtree point rect circle db command state entry regression prio_queue registry database_test rect_test circle_test knn_test rnn_test
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
