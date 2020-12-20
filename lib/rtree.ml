@@ -47,8 +47,7 @@ let value (n : t) : Entry.t =
   | `Node _ -> failwith "Node does not have a value"
   | `Entry e -> e
 
-(* TODO remove;  this is for remove collapsing debugging
-    removed_nodes -- number of nodes has been removed
+(*  removed_nodes -- number of nodes has been removed
     added_nodes   -- number of nodes has been added *)
 let removed_nodes = ref 0
 let added_nodes   = ref 0
@@ -61,14 +60,14 @@ let print_counters uniq_nodes = Printf.printf
 let reset_counters() = removed_nodes := 0; added_nodes := 0
 
 let node_append box n =
-  added_nodes := !added_nodes + 1;          (* TODO Remove *)
+  added_nodes := !added_nodes + 1;           
   match n.children with 
   | `Node lst -> n.children <- `Node (box :: lst)
   | `Entry _ -> failwith "Cannot append to an Entry"
 
 (**[node_remove node entry] removes an [entry] from a [node]. *)
 let node_remove node entry =
-  removed_nodes := !removed_nodes + 1;          (* TODO Remove *)
+  removed_nodes := !removed_nodes + 1;          
   List.filter (fun el -> el != entry) (children node)
 
 let mbr_of_children (n : t) : Rect.t list =
@@ -129,7 +128,7 @@ let node_with_children n c_lst =
     mbr = Rect.empty;
     children = `Node c_lst;
   } in
-  added_nodes := !added_nodes + 1; (* TODO Remove *)
+  added_nodes := !added_nodes + 1;  
   List.iter (fun c -> c.parent <- Some node) c_lst;
   node.children <- `Node c_lst;
   node
@@ -154,7 +153,7 @@ let rec handle_overflow (n : t) : unit =
     (* update bounding box of n' *)
     n'.mbr <- n' 
               |> mbr_of_children 
-              |> Rect.mbr_of_list; (* TODO factor out *)
+              |> Rect.mbr_of_list; 
     (* add new node to parent *)
     n.children <- `Node (n' :: n'' :: []);
     (* update bounding box of parent*)
@@ -193,7 +192,7 @@ let choose_subtree (e : t) (n : t) : t =
   in let choices = List.sort (compare_choices) choices
   in choices 
      |> List.hd 
-     |> snd (* TODO tie breakers *)
+     |> snd  
 
 let rec add_aux entry node =
   match node.children with
@@ -278,7 +277,7 @@ let ldist (p1,p2) ((qb1,qb2),(qu1,qu2)) =
   if p1 < qb1 && p2 < qu2 then pdist (p1,p2) (qb1,qb2) else    
     (* Bottom Right *)
   if p1 > qu1 && p2 < qu2 then pdist (p1,p2) (qu1,qb2) else 0.
-    
+
 let mindist p a =
   let pl = Entry.loc p in
   match a.children with
@@ -320,9 +319,9 @@ let n_infty n =
   aux 0 empty
 
 let knn k query node =
-(*  if r = 1 then
-    let (res,_) = nn_aux query node ([],infinity) in res 
-    else *)
+  (*  if r = 1 then
+      let (res,_) = nn_aux query node ([],infinity) in res 
+      else *)
   let nn = n_infty k in
   knn_aux query node nn |>
   Prio_queue.to_list |>
@@ -340,7 +339,7 @@ let rec search c r node =
         List.iter (fun el -> acc := !acc @ search c r el) lst;
         !acc
       end
-      
+
 let rec propagate_mbr node =
   match node with
   | None -> ()

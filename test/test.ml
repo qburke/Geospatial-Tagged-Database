@@ -266,9 +266,13 @@ let () = execute
        "\nSearch (50000.,50000.) 100. from %d elements" 
        elements_count)
 
+(*if given two lists how to compare loc's to match; one list is called 
+  collection and the other will be a generated list of floats (location
+  values) *)
 let collection = search (50000.,50000.) 100. int_test_tree
 let () = Printf.printf 
     "Found: %d entries\n" (List.length collection)
 let () = List.iteri 
     (fun idx x  -> Printf.printf "Entry %d [%f,%f]\n" idx 
         (fst (Entry.loc x)) (snd (Entry.loc x))) collection
+
