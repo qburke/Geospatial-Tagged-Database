@@ -55,7 +55,8 @@ let added_nodes   = ref 0
 
 (* Print added_nodes, removed_nodes *)
 let print_counters uniq_nodes = Printf.printf 
-    "\nadded: %d, removed: %d, size: %d\n" !added_nodes !removed_nodes uniq_nodes
+    "\nadded: %d, removed: %d, size: %d\n" 
+    !added_nodes !removed_nodes uniq_nodes
 
 let reset_counters() = removed_nodes := 0; added_nodes := 0
 
@@ -104,11 +105,17 @@ let split (n : t list) : (t list * t list) =
   for j = 0 to 1 do
     for i = start_idx to end_idx do
       let s, s' = split_at i (List.nth sorted_lsts j) in 
-      let mbr_s = s |> List.map (fun x -> x.mbr) |> Rect.mbr_of_list in 
-      let mbr_s' = s' |> List.map (fun x -> x.mbr) |> Rect.mbr_of_list in
-      let new_perimeter_sum = (Rect.perimeter mbr_s) +. (Rect.perimeter mbr_s') 
+      let mbr_s = s 
+                  |> List.map (fun x -> x.mbr) 
+                  |> Rect.mbr_of_list in 
+      let mbr_s' = s' 
+                   |> List.map (fun x -> x.mbr) 
+                   |> Rect.mbr_of_list in
+      let new_perimeter_sum = 
+        (Rect.perimeter mbr_s) +. (Rect.perimeter mbr_s') 
       in
-      if new_perimeter_sum < !min_perimeter_sum then begin
+      if new_perimeter_sum < !min_perimeter_sum 
+      then begin
         min_perimeter_sum := new_perimeter_sum; 
         min_split := (s, s')
       end
@@ -132,20 +139,28 @@ let node_with_children n c_lst =
     shared parent.*)
 let rec handle_overflow (n : t) : unit =
   (* split the children of n to be n and n'*)
-  let u, u' = n |> children |> split in
+  let u, u' = n 
+              |> children 
+              |> split in
   if n.parent = None then
     (* update children of n to be first result of split *)
     let n' = node_with_children n u in
     (* create new node n' around second result of split *)
     let n'' = node_with_children n u' in
     (* update bounding box of n'' *)
-    n''.mbr <- n'' |> mbr_of_children |> Rect.mbr_of_list;
+    n''.mbr <- n'' 
+               |> mbr_of_children 
+               |> Rect.mbr_of_list;
     (* update bounding box of n' *)
-    n'.mbr <- n' |> mbr_of_children |> Rect.mbr_of_list; (* TODO factor out *)
+    n'.mbr <- n' 
+              |> mbr_of_children 
+              |> Rect.mbr_of_list; (* TODO factor out *)
     (* add new node to parent *)
     n.children <- `Node (n' :: n'' :: []);
     (* update bounding box of parent*)
-    n.mbr <- n |> mbr_of_children |> Rect.mbr_of_list;
+    n.mbr <- n 
+             |> mbr_of_children 
+             |> Rect.mbr_of_list;
   else
     let w = parent n in
     (* update children of n to be first result of split *)
@@ -171,20 +186,27 @@ let choose_subtree (e : t) (n : t) : t =
   let enlarge_child c =
     Rect.(c.mbr |> enlargement_rect e.mbr |> area, c)
   in let choices = List.map (enlarge_child) (children n)
-  in let compare_choices c1 c2 = fst c1 -. fst c2 |> ( *. ) 10.0 
-                                 |> Float.to_int
+  in let compare_choices c1 c2 = 
+       fst c1 -. fst c2 
+       |> ( *. ) 10.0 
+       |> Float.to_int
   in let choices = List.sort (compare_choices) choices
-  in choices |> List.hd |> snd (* TODO tie breakers *)
+  in choices 
+     |> List.hd 
+     |> snd (* TODO tie breakers *)
 
 let rec add_aux entry node =
   match node.children with
   | `Entry _ -> (* goes one deeper than necessary*)
     let pnode = parent node
-    in let entry = {entry with parent = Some pnode }
+    in 
+    let entry = {entry with parent = Some pnode }
     in begin
       node_append entry pnode;
       (* when overflow, then split*)
-      if pnode |> children |> List.length > max_entries then
+      if pnode 
+         |> children 
+         |> List.length > max_entries then
         handle_overflow pnode
       else ()
     end
@@ -212,11 +234,17 @@ let choose_container p node =
 let rec find_aux ent = function
   | node :: t -> begin
       match node.children with
-      | `Node _ -> find_aux ent (choose_container (Entry.loc ent) node)
-      | `Entry e -> if (node.mbr = (Entry.mbr ent) && Entry.id ent = Entry.id e) 
-        then (* TODO change / cleanup*)
-          true, node
-        else find_aux ent t
+      | `Node _ -> find_aux ent 
+                     (choose_container (Entry.loc ent) node)
+      | `Entry e -> 
+        if (node.mbr = (Entry.mbr ent) && Entry.id ent = Entry.id e) then
+          begin
+            true, node
+          end
+        else 
+          begin
+            find_aux ent t
+          end
     end
   | [] -> failwith "Can't find the node"
 
@@ -229,7 +257,6 @@ let find e tree =
   }
   in try find_aux e [tree] with
   | _ -> false, entry
-
 
 let pdist (p1,p2) (q1,q2) =
   ((p1 -. q1) ** 2.) +. ((p2 -. q2) ** 2.) |> sqrt
@@ -302,6 +329,18 @@ let knn k query node =
   List.filter (fun (p,_) -> p < infinity) |>
   List.map (fun (_,x) -> x)
 
+let rec search c r node =
+  let acc = ref [] in
+  if not (Circle.intersect c r node.mbr) 
+  then [] 
+  else
+    match node.children with
+    | `Entry x -> [x]
+    | `Node lst -> begin
+        List.iter (fun el -> acc := !acc @ search c r el) lst;
+        !acc
+      end
+      
 let rec propagate_mbr node =
   match node with
   | None -> ()
@@ -316,7 +355,8 @@ let rec remove_collapse node child =
     me.children <- `Node (node_remove me child);
     if List.length (children me) = 0 then
       begin
-        me.mbr <- Rect.empty;        (* only necessary for root, but it does not hurt *)
+        me.mbr <- Rect.empty;        
+        (* only necessary for root, but it does not hurt *)
         remove_collapse me.parent me;
       end
     else
@@ -333,12 +373,14 @@ let remove e tree =
 
 let rec to_list node =
   match node.children with
-  | `Node lst -> List.fold_left (fun acc el -> acc @ (to_list el)) [] lst
+  | `Node lst -> List.fold_left (
+      fun acc el -> acc @ (to_list el)) [] lst
   | `Entry e ->  [e]
 
 let rec length node =
   match node.children with
-  | `Node lst -> 1 + List.fold_right (fun el t -> max (length el) t) lst 0
+  | `Node lst -> 1 + List.fold_right 
+                   (fun el t -> max (length el) t) lst 0
   | `Entry _ -> 1
 
 (* FIXME *)

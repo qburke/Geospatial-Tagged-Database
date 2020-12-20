@@ -8,21 +8,28 @@ let ints_from_to lb ub =
   aux lb [] |> List.rev
     
 let entries_of_int_range lst =
-  List.map (fun i -> ((float_of_int i, float_of_int i), i)) lst
+  List.map (fun i -> 
+      ((float_of_int i, float_of_int i), i)) lst
 
 let floats_from_to lb ub =
   let rec floats_from_to_aux lb ub acc =
     match lb = ub with
     | true -> acc
-    | false -> floats_from_to_aux (lb + 1) ub 
-                 (((float_of_int lb, float_of_int lb), string_of_int lb)::acc)
+    | false -> floats_from_to_aux 
+                 (lb + 1) ub 
+                 (((float_of_int lb, 
+                    float_of_int lb), 
+                   string_of_int lb)::acc)
   in List.rev (floats_from_to_aux lb ub [])
 
 let add_from_to lb ub t =
-  if lb < ub then let lst = floats_from_to lb ub in
-    List.iter (fun (p, x) -> add (Entry.manual x p [] `Null) t) lst
+  if lb < ub 
+  then let lst = floats_from_to lb ub in
+    List.iter (fun (p, x) -> 
+        add (Entry.manual x p [] `Null) t) lst
   else let lst = List.rev (floats_from_to ub lb) in
-    List.iter (fun (p, x) -> add (Entry.manual x p [] `Null) t) lst
+    List.iter (fun (p, x) -> 
+        add (Entry.manual x p [] `Null) t) lst
 
 (** [add_rand base range n t] inserts  to tree [t] 
     [n] random entries between [base] and [base] + [range]*)

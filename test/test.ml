@@ -88,7 +88,8 @@ let mem_test
     (tree : t)
     (expected_output : bool) : test =
   name >:: (fun _ ->
-      assert_equal expected_output (mem entry tree) ~printer:string_of_bool)
+      assert_equal expected_output 
+        (mem entry tree) ~printer:string_of_bool)
 
 (** [mem_test name p x tree expected_output] constructs an OUnit
     test named [name] that asserts each entry is a member of [tree]. *)
@@ -99,7 +100,8 @@ let mem_list_test
   List.map
     (fun x ->
        name >:: (fun _ ->
-           assert_equal true (mem x tree) ~printer:string_of_bool)
+           assert_equal true 
+             (mem x tree) ~printer:string_of_bool)
     )
     entries
 
@@ -137,17 +139,6 @@ let rtree_tests = List.flatten [
     ]
   ]
 
-(*let json = Yojson.Basic.from_file "test_entry.json"
-  let ithaca_entry = Entry.from_json json
-
-  let entry_tests = [
-  "id is Ithaca" >:: (fun _ -> assert_equal "Ithaca" (Entry.id ithaca_entry));
-  "location is Ithaca" >:: (fun _ -> assert_equal (42.44, -76.50)
-                               (Entry.loc ithaca_entry));
-  "tags have Cornell" >:: (fun _ -> 
-      assert_equal true (ithaca_entry |> Entry.tags |> List.mem "Cornell"));
-  ]
-*)
 let suite =
   "test suite for final_project"  >::: List.flatten [
    rect_tests;
@@ -195,30 +186,41 @@ let elements_count = 100000
 
 (* [add] regression increasing order *)
 let int_test_tree = empty ()
-let () = execute (fun () -> add_from_to 0 elements_count int_test_tree)
-    (Printf.sprintf "test adding %d elements increasing order" elements_count)
+let () = execute 
+    (fun () -> 
+       add_from_to 0 elements_count int_test_tree)
+    (Printf.sprintf 
+       "test adding %d elements increasing order" elements_count)
 
 (* [add] regression decreasing order *)
 let int_test_tree = empty ()
-let () = execute (fun () -> add_from_to elements_count 0 int_test_tree)
-    (Printf.sprintf "test adding %d elements decreasing order" elements_count)
+let () = execute 
+    (fun () -> 
+       add_from_to elements_count 0 int_test_tree)
+    (Printf.sprintf 
+       "test adding %d elements decreasing order" elements_count)
 
 (* [add] regression random order *)
 let int_test_tree = empty ()
-let () = execute (fun () -> add_random elements_count 
-                     elements_count int_test_tree)
-    (Printf.sprintf "test adding %d random elements" elements_count)
+let () = execute 
+    (fun () -> add_random elements_count 
+        elements_count int_test_tree)
+    (Printf.sprintf 
+       "test adding %d random elements" elements_count)
 
 (* [add] regression cluster element *)
 let int_test_tree = empty ()
-let () = execute (fun () -> add_cluster elements_count 
-                     (elements_count/10) elements_count int_test_tree)
-    (Printf.sprintf "test adding %d cluster elements" elements_count)
+let () = execute 
+    (fun () -> add_cluster elements_count 
+        (elements_count/10) elements_count int_test_tree)
+    (Printf.sprintf 
+       "test adding %d cluster elements" elements_count)
 
 (* [length] regression *)
 let int_test_tree = empty ()
 let () = add_from_to 0 elements_count int_test_tree
-let () = Printf.printf "Tree with %d element has tree length of = %d\n" 
+let () = Printf.printf 
+    "Tree with %d element has tree length of = %d\n" 
     elements_count (length int_test_tree)
 
 let elements_count = 100000
@@ -247,3 +249,24 @@ let lst = to_list int_test_tree
 let () = assert(List.length lst = 0)
 let () = assert(int_test_tree = empty ())
 
+(* test the search  *)
+let int_test_tree = empty ()
+let () = execute 
+    (fun () -> 
+       add_from_to 0 elements_count int_test_tree)
+    (Printf.sprintf 
+       "\nadding %d elements increasing order" elements_count)
+
+let () = execute 
+    (fun () -> 
+       ignore(search (50000.,50000.) 100. int_test_tree))
+    (Printf.sprintf 
+       "\nSearch (50000.,50000.) 100. from %d elements" 
+       elements_count)
+
+let collection = search (50000.,50000.) 100. int_test_tree
+let () = Printf.printf 
+    "Found: %d entries\n" (List.length collection)
+let () = List.iteri 
+    (fun idx x  -> Printf.printf "Entry %d [%f,%f]\n" idx 
+        (fst (Entry.loc x)) (snd (Entry.loc x))) collection
