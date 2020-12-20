@@ -1,3 +1,4 @@
 (library
+  (public_name geotag-db)
   (name lib)
   (libraries yojson dolog opium))
