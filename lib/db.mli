@@ -55,7 +55,7 @@ val list_of_reverse_index : database -> string list
 (** TODO *)
 val list_of_tag_collection : database -> string -> element list
 
-(** TODO *)
+(** [list_of_elements db] is the list of all elements in [db] *)
 val list_of_elements : database -> element list
 
 (** [add db e]  adds the data of type ['a] of an item of type ['a element] to
@@ -78,7 +78,7 @@ val rnn_search : database -> Point.t -> float -> string list -> element list
 (** [knn_search db k pt tags] searches [db] for the k nearest niehgbors
     to point [pt] and applies tag_search to the results *)
 val knn_search : database -> int -> Point.t -> string list -> element list
-  
+
 (** [string_of_element e] returns the string representation of [e]. Prints
     verbose data if [v] is true *)
 val string_of_element : bool -> element -> string

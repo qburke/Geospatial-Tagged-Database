@@ -8,6 +8,7 @@ exception MalformedJSON
 exception EntryNotFound of string
 exception EmptyId
 
+(** [exn_response exn] builds the error response when [exn] is encountered. *)
 let exn_response exn =
   let status, err_msg = match exn with
     | ParamNotFound p ->
@@ -34,8 +35,11 @@ let exn_response exn =
   in Response.of_plain_text ~status:status err_msg
      |> Lwt.return
 
+(** [reg] is the mutable registry of databases for the server instance *)
 let reg = Registry.init ()
 
+(** [timestamp_msg channel optype msg] is the timestamped message for [optype]
+    and [msg]. *)
 let timestamp_msg oc optype msg=
   let utime = Unix.time() in
   let time = utime |> Unix.localtime in
@@ -51,6 +55,8 @@ let timestamp_msg oc optype msg=
     optype
     msg
 
+(** [add_log_entry name optype msg] adds a log entry for [optype] with [msg] to
+    the logfile for database [name]. *)
 let add_log_entry dbname optype msg = 
   let fname = dbname ^ ".log" in
   let oc = open_out_gen [Open_append; Open_creat] 0o666 fname in
@@ -75,6 +81,8 @@ let db_from_req req =
   with
   | Not_found -> raise DbNotLoaded
 
+(** [initialize_handler req] is the response for the /initialize endpoint with
+    request [req]. *)
 let initialize_handler req =
   try
     let dbname = get_req_param "name" req in
@@ -86,6 +94,8 @@ let initialize_handler req =
   with
   | e -> exn_response e
 
+(** [load_handler req] is the response for the /load endpoint with
+    request [req]. *)
 let load_handler req =
   try begin 
     let name = get_req_param "name" req
@@ -97,6 +107,8 @@ let load_handler req =
   end with
   | e -> exn_response e
 
+(** [tag_list_from_json json] is the list of tags from its JSON representation
+    [json]. *)
 let tag_list_from_json json =
   match json with
   | `List lst -> List.map
@@ -107,6 +119,8 @@ let tag_list_from_json json =
                    lst
   | _ -> raise MalformedTagList
 
+(** [tag_search_handler req] is the response for the /tag-search endpoint with
+    request [req]. *)
 let tag_search_handler req =
   Lwt.bind 
     (Request.to_json req)
@@ -129,6 +143,8 @@ let tag_search_handler req =
        | e -> exn_response e
     )
 
+(** [rnn_search_handler req] is the response for the /rnn endpoint with
+    request [req]. *)
 let rnn_search_handler req =
   Lwt.bind 
     (Request.to_json req)
@@ -155,6 +171,8 @@ let rnn_search_handler req =
        | e -> exn_response e
     )
 
+(** [knn_search_handler req] is the response for the /knn endpoint with
+    request [req]. *)
 let knn_search_handler req =
   Lwt.bind 
     (Request.to_json req)
@@ -181,6 +199,8 @@ let knn_search_handler req =
        | e -> exn_response e
     )
 
+(** [add_handler req] is the response for the /add endpoint with
+    request [req]. *)
 let add_handler req = 
   Lwt.bind
     (Request.to_json req)
@@ -210,6 +230,8 @@ let add_handler req =
        | e -> exn_response e
     )
 
+(** [delete_handler req] is the response for the /delete endpoint with
+    request [req]. *)
 let delete_handler req = 
   try 
     let db = db_from_req req
@@ -227,6 +249,8 @@ let delete_handler req =
   with
   | e -> exn_response e
 
+(** [write_handler req] is the response for the /write endpoint with
+    request [req]. *)
 let write_handler req =
   try 
     let db = db_from_req req

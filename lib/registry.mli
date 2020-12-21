@@ -1,4 +1,4 @@
-(** A mutable registry of active / loaded databases *)
+(** A mutable registry of active or loaded databases *)
 
 (** type t is the type of database registry *)
 type t
