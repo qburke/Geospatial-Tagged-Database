@@ -160,7 +160,6 @@ let () = add rre_2 int_tree_5
 let () = add rre_1 int_tree_5
 
 let int_tree_6 = empty ()
-let () = add entry_0 int_tree_6
 let () = add r3e_10 int_tree_6
 let () = add r3e_9 int_tree_6
 let () = add r3e_8 int_tree_6
@@ -179,7 +178,6 @@ let q1 =
   let e3 = insert 18. "c" in
   let e4 = insert  0. "d" in
   empty |> e1 |> e2 |> e3 |> e4
-
 
 let knn_tests = [
   (* Priority queue tests *)
@@ -221,5 +219,4 @@ let knn_tests = [
   (* Better Distribution of data, O=(0,0) *)
   knn_test "n10,k5" 5 entry_0 int_tree_6
     [r3e_1;r3e_2;r3e_3;r3e_4;r3e_5];
-
 ]
