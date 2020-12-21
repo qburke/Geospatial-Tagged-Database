@@ -59,16 +59,18 @@ val list_of_tag_collection : database -> string -> element list
 val list_of_elements : database -> element list
 
 (** [add db e]  adds the data of type ['a] of an item of type ['a element] to
-    the [reverse_index] of [db] for each tag_collection corresponding to the tags of
-    [e]. If there is a tag not present in [reverse_index] then a new tag collection is
-    created and added to [reverse_index] with the new tag as the key. *)
+    the [reverse_index] of [db] for each tag_collection corresponding to the
+    tags of [e]. If there is a tag not present in [reverse_index] then a new ta
+    collection is created and added to [reverse_index] with the new tag as the
+    key. *)
 val add : database -> element -> unit
 
 (** [remove db e] removes the data represented by [e] from the database *)
 val remove : database -> element -> unit
 
-(** [tag_search db objects tags] takes a collection of objects of type ['a element list] 
-    and returns a list of elements which match all of the tags in the [string list] *)
+(** [tag_search db objects tags] takes a collection of objects of type
+    ['a element list] and returns a list of elements which match all of the tag
+    in the [string list] *)
 val tag_search : database -> element list -> string list -> element list
 
 (** [rnn_search db c r tags] searches [db] for elements within a [r] 

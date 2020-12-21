@@ -26,10 +26,10 @@ let is_initialized = function
 
 let query_elems st v tags =
   try (match st with
-  | Database db ->
-    tag_search db (list_of_elements db) tags |>
-    List.map (fun e -> string_of_element v e)
-  | Empty -> raise NoDatabaseInitialized) with
+      | Database db ->
+        tag_search db (list_of_elements db) tags |>
+        List.map (fun e -> string_of_element v e)
+      | Empty -> raise NoDatabaseInitialized) with
   | Not_found -> raise TagNotFound
 
 let add st id location tags data =
@@ -80,15 +80,20 @@ let write_db st fmt f =
 let help param =
   let initialize = "[initialize] creates a new database\n" in
   let load = "[load] loads from a json file\n" in
-  let list = "[list (verbose)] prints the elements of the database. [verbose] is an optional parameter to print the json data of each element.\n" in
+  let list = "[list (verbose)] prints the elements of the database. [verbose] \
+              is an optional parameter to print the json data of each element.\
+              \n" in
   let tags = "[tags] prints the current tags in the database\n" in
-  let query = "[query] searches the database by location and tags. [verbose] is an optional parameter to print the json data of each element" in
+  let query = "[query] searches the database by location and tags. [verbose] is\
+               an optional parameter to print the json data of each element" in
   let add = "[add] adds an element to the database" in
   let delete = "[delete] removes an element from the database" in
   let write = "[write] writes the database to a file\n" in
   let quit = "[quit] exits the interface" in
   let default =
-    "The following commands are available\nhelp\ninitialize\nload\nquery\nadd\ndelete\nwrite\nquit\nTo get information about a command, use [help \"command\"]\n" in
+    "The following commands are available\nhelp\ninitialize\nload\nquery\nadd\n\
+     delete\nwrite\nquit\nTo get information about a command, use [help \"\
+     command\"]\n" in
   match param with
   | "initialize"::[] -> initialize
   | "load"::[] -> load

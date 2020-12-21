@@ -33,6 +33,6 @@ val data : t -> Yojson.Basic.t
 (** [to_json entry] is the JSON representation of [entry]. *)
 val to_json : t -> Yojson.Basic.t
 
-(** [to_string v entry] is the string representation of [entry]. If [v] is false,
-    the string will omit the entry data.*)
+(** [to_string v entry] is the string representation of [entry]. If [v] is
+    false, the string will omit the entry data.*)
 val to_string : bool -> t -> string
