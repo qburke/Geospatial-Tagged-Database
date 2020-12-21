@@ -43,7 +43,8 @@ let of_point p = (p, p)
 let enlargement_rect ((x0, y0), (x1, y1)) ((x0', y0'), (x1', y1')) = 
   ((min x0 x0', min y0 y0'), (max x1 x1', max y1 y1'))
 
-let mbr_of_list (lst : t list) : t = List.fold_left enlargement_rect (List.hd lst) lst
+let mbr_of_list (lst : t list) : t =
+  List.fold_left enlargement_rect (List.hd lst) lst
 
 let enlarge_rect_area r1 r2 = 
   let new_rect = enlargement_rect r1 r2

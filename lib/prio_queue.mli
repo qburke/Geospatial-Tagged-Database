@@ -3,24 +3,26 @@
     Modified to store elements in descending, rather than ascending
     order. as well as some function argument orders*)
 
-(** TODO *)
+(** [priority] is the type of priority for the queue. A smaller value means
+    higher priority. *)
 type priority = float
 
-(** TODO *)
+(** [queue] is the type of priority queues *)
 type 'a queue = Empty | Node of priority * 'a * 'a queue * 'a queue
 
-(** TODO *)                          
+(** [empty] is the empty priority queue *)                          
 val empty : 'a queue
 
-(** TODO *)    
+(** [insert p elt q] is the queue with [elt] inserted into [q] with priority
+    [p]. *)    
 val insert : priority -> 'a -> 'a queue -> 'a queue
 
 exception Queue_is_empty
 
-(** TODO *)
+(** [remove_top q] is the queue with the highest priority element removed *)
 val remove_top : 'a queue -> 'a queue
 
-(** TODO *)
+(** [extract q] is the equivalent of pop for the priority queue [q] *)
 val extract : 'a queue -> priority * 'a * 'a queue
 
 (* Original Code starts here *)

@@ -143,7 +143,9 @@ let open_interface () =
             | [] -> false 
             | _ -> raise InvalidInput in
           let queries = parse_query () st in
-          time (queries |> query_elems st v |> print_elems ()) ("Query complete in"); 
+          time
+            (queries |> query_elems st v |> print_elems ())
+            ("Query complete in"); 
           loop st
         | Add ->
           let (id,tags,location) = parse_add () st in
@@ -165,7 +167,8 @@ let open_interface () =
           loop st;
     with
     | DatabaseAlreadyExists ->
-      (Log.error "Cannot initialize multiple databases\nPress enter to continue...";
+      (Log.error
+         "Cannot initialize multiple databases\nPress enter to continue...";
        match read_line () with _ -> print_string "";
          loop st;)
     | NoDatabaseInitialized ->
@@ -192,7 +195,6 @@ let open_interface () =
   init_state |> loop
 
 let main () =
-  (* ANSITerminal.(); unused import? *)
   match Array.length Sys.argv with
   | 1 -> Server.start ()
   | _ -> open_interface ()

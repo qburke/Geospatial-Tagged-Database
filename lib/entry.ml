@@ -32,7 +32,8 @@ let from_json json =
     | None -> failwith "id not provided" in
   let p = extract_point "location" assoc_list in
   let tags = match List.assoc_opt "tags" assoc_list with
-    | Some (`List lst) -> List.map (str_of_json "tags is not a list of strings") lst
+    | Some (`List lst) ->
+      List.map (str_of_json "tags is not a list of strings") lst
     | Some `Null -> []
     | Some _ -> failwith "tags is not a list of strings or null"
     | None -> failwith "tags not provided" in
@@ -75,5 +76,6 @@ let to_json ent = ent.data
 let to_string v ent =
   "id: " ^ ent.id ^ "\n" ^
   "mbr: " ^ Point.to_string ent.loc ^ "\n" ^
-  "tags: " ^ List.fold_left (fun tag acc -> acc ^ ", " ^ tag ) "" ent.tags ^ "\n" ^
+  "tags: " ^ List.fold_left
+    (fun tag acc -> acc ^ ", " ^ tag ) "" ent.tags ^ "\n" ^
   if v then Yojson.Basic.pretty_to_string ent.data else ""

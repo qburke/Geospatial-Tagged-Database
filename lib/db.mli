@@ -49,26 +49,30 @@ val location_of_element : element -> Point.t
 (** [create_db name] is a new, empty database named [name] *)
 val create_db : string -> database 
 
-(** TODO *)
+(** [list_of_reverse_index db] returns a list of the tags in the 
+    database [db] *)
 val list_of_reverse_index : database -> string list
 
-(** TODO *)
+(** [list_of_tag_collection db tag] returns a list of all of the
+    elements with tag [tag] *)
 val list_of_tag_collection : database -> string -> element list
 
-(** TODO *)
+(** [list_of_elements db] is the list of all elements in [db] *)
 val list_of_elements : database -> element list
 
 (** [add db e]  adds the data of type ['a] of an item of type ['a element] to
-    the [reverse_index] of [db] for each tag_collection corresponding to the tags of
-    [e]. If there is a tag not present in [reverse_index] then a new tag collection is
-    created and added to [reverse_index] with the new tag as the key. *)
+    the [reverse_index] of [db] for each tag_collection corresponding to the
+    tags of [e]. If there is a tag not present in [reverse_index] then a new ta
+    collection is created and added to [reverse_index] with the new tag as the
+    key. *)
 val add : database -> element -> unit
 
 (** [remove db e] removes the data represented by [e] from the database *)
 val remove : database -> element -> unit
 
-(** [tag_search db objects tags] takes a collection of objects of type ['a element list] 
-    and returns a list of elements which match all of the tags in the [string list] *)
+(** [tag_search db objects tags] takes a collection of objects of type
+    ['a element list] and returns a list of elements which match all of the tag
+    in the [string list] *)
 val tag_search : database -> element list -> string list -> element list
 
 (** [rnn_search db c r tags] searches [db] for elements within a [r] 
@@ -78,7 +82,7 @@ val rnn_search : database -> Point.t -> float -> string list -> element list
 (** [knn_search db k pt tags] searches [db] for the k nearest niehgbors
     to point [pt] and applies tag_search to the results *)
 val knn_search : database -> int -> Point.t -> string list -> element list
-  
+
 (** [string_of_element e] returns the string representation of [e]. Prints
     verbose data if [v] is true *)
 val string_of_element : bool -> element -> string

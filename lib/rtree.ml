@@ -382,7 +382,6 @@ let rec length node =
                    (fun el t -> max (length el) t) lst 0
   | `Entry _ -> 1
 
-(* FIXME *)
 let rec json_of_t t =
   `Assoc [
     ("bottom-left", (t.mbr |> Rect.ll |> Point.to_json));
