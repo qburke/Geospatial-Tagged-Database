@@ -49,10 +49,12 @@ val location_of_element : element -> Point.t
 (** [create_db name] is a new, empty database named [name] *)
 val create_db : string -> database 
 
-(** TODO *)
+(** [list_of_reverse_index db] returns a list of the tags in the 
+    database [db] *)
 val list_of_reverse_index : database -> string list
 
-(** TODO *)
+(** [list_of_tag_collection db tag] returns a list of all of the
+    elements with tag [tag] *)
 val list_of_tag_collection : database -> string -> element list
 
 (** [list_of_elements db] is the list of all elements in [db] *)
