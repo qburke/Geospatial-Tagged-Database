@@ -1,6 +1,5 @@
 TEST=test/test.exe
 MAIN=bin/main.exe
-OCAMLBUILD=ocamlbuild -use-ocamlfind
 
 default: build
 	dune utop lib
