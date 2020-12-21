@@ -1,15 +1,12 @@
 open Opium
 module Log = Dolog.Log
 
-(* FIXME Yojson Basic vs Safe
-   TODO reexamine db function overhead -- search needs db as list? remove needs to find first?
-*)
-
 exception ParamNotFound of string
 exception DbNotLoaded
 exception MalformedTagList
 exception MalformedJSON
 exception EntryNotFound of string
+exception EmptyId
 
 let exn_response exn =
   let status, err_msg = match exn with
@@ -27,6 +24,12 @@ let exn_response exn =
       `Bad_request, "Malformed JSON"
     | EntryNotFound id ->
       `Not_found, "Entry with id \"" ^ id ^ "\" not found"
+    | EmptyId ->
+      `Bad_request, "id cannot be an empty string"
+    | Failure s when s = "float_of_string" ->
+      `Bad_request, "Coordinates and radius must be floats"
+    | Failure s when s = "int_of_string" ->
+      `Bad_request, "Number of results must be an interger"
     | _ -> `Bad_request, "Unknown error"
   in Response.of_plain_text ~status:status err_msg
      |> Lwt.return
@@ -126,6 +129,58 @@ let tag_search_handler req =
        | e -> exn_response e
     )
 
+let rnn_search_handler req =
+  Lwt.bind 
+    (Request.to_json req)
+    (fun json ->
+       try begin
+         let json = match json with
+           | Some json -> json
+           | None -> raise MalformedJSON
+         in let db = db_from_req req
+         in let x = get_req_param "center_x" req
+         in let y = get_req_param "center_y" req
+         in let center = (float_of_string x, float_of_string y)
+         in let radius = float_of_string (get_req_param "radius" req)
+         in let tags = tag_list_from_json json
+         in let elems = Db.rnn_search db center radius tags
+         in `List (List.map
+                     (fun elem -> elem |> Db.entry_of_element |> Entry.to_json)
+                     elems)
+            |> Yojson.Basic.to_string
+            |> Yojson.Safe.from_string
+            |> Response.of_json
+            |> Lwt.return
+       end with
+       | e -> exn_response e
+    )
+
+let knn_search_handler req =
+  Lwt.bind 
+    (Request.to_json req)
+    (fun json ->
+       try begin
+         let json = match json with
+           | Some json -> json
+           | None -> raise MalformedJSON
+         in let db = db_from_req req
+         in let x = get_req_param "center_x" req
+         in let y = get_req_param "center_y" req
+         in let center = (float_of_string x, float_of_string y)
+         in let num_results = int_of_string (get_req_param "num" req)
+         in let tags = tag_list_from_json json
+         in let elems = Db.knn_search db num_results center tags
+         in `List (List.map
+                     (fun elem -> elem |> Db.entry_of_element |> Entry.to_json)
+                     elems)
+            |> Yojson.Basic.to_string
+            |> Yojson.Safe.from_string
+            |> Response.of_json
+            |> Lwt.return
+       end with
+       | e -> exn_response e
+    )
+
 let add_handler req = 
   Lwt.bind
     (Request.to_json req)
@@ -137,19 +192,20 @@ let add_handler req =
          in let ent = json
                       |> Yojson.Safe.to_basic
                       |> Entry.from_json
-         in let db = db_from_req req
-         in let dbname = get_req_param "db" req
-         in let elem = Db.create_element
-                (Entry.id ent)
-                (Entry.loc ent)
-                (Entry.tags ent)
-                (Entry.to_json ent)
-         in let () = Db.add db elem
-         in let msg = ent |> Entry.to_json |> Yojson.Basic.to_string
-         in let () = add_log_entry dbname "ADD" msg;
-         in "Success"
-            |> Response.of_plain_text
-            |> Lwt.return
+         in if (Entry.id ent) = "" then raise EmptyId
+         else let db = db_from_req req
+           in let dbname = get_req_param "db" req
+           in let elem = Db.create_element
+                  (Entry.id ent)
+                  (Entry.loc ent)
+                  (Entry.tags ent)
+                  (Entry.to_json ent)
+           in let () = Db.add db elem
+           in let msg = ent |> Entry.to_json |> Yojson.Basic.to_string
+           in let () = add_log_entry dbname "ADD" msg;
+           in "Success"
+              |> Response.of_plain_text
+              |> Lwt.return
        end with
        | e -> exn_response e
     )
@@ -188,6 +244,8 @@ let start () =
   |> App.post "/initialize" initialize_handler
   |> App.post "/add" add_handler
   |> App.get "/tag-search" tag_search_handler
+  |> App.get "/rnn" rnn_search_handler
+  |> App.get "/knn" knn_search_handler
   |> App.post "/delete" delete_handler
   |> App.post "/load" load_handler
   |> App.post "/write" write_handler
