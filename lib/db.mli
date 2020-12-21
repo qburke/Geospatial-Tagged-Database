@@ -58,6 +58,14 @@ val remove : database -> element -> unit
     and returns a list of elements which match all of the tags in the [string list] *)
 val tag_search : database -> element list -> string list -> element list
 
+(** [rnn_search db c r tags] searches [db] for elements within a [r] 
+    radius of [c], and applies tag_search to the results *)
+val rnn_search : database -> Point.t -> float -> string list -> element list
+
+(** [knn_search db k pt tags] searches [db] for the k nearest niehgbors
+    to point [pt] and applies tag_search to the results *)
+val knn_search : database -> int -> Point.t -> string list -> element list
+  
 (** [string_of_element e] returns the string representation of [e]. Prints
     verbose data if [v] is true *)
 val string_of_element : bool -> element -> string

@@ -107,6 +107,15 @@ let tag_search db objects tags =
          else false) true tags in
   List.filter filter_func objects
 
+let rnn_search db c r tags =
+  let elems = Rtree.search c r db.rTree in
+  tag_search db elems tags
+
+let knn_search db k pt tags =
+  let query = Entry.manual "" pt [] `Null in
+  let elems = Rtree.knn k query db.rTree in
+  tag_search db elems tags
+
 let string_of_element v e =
   Entry.to_string v e
 
